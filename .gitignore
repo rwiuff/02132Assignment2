@@ -478,5 +478,5 @@ TSWLatexianTemp*
 project/**/metals.sbt
 *project/
 *target/
-*generated/**
+/generated/**
 # End of https://www.toptal.com/developers/gitignore/api/latex,scala,visualstudiocode,intellij,java
