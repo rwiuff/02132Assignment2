@@ -472,4 +472,12 @@ TSWLatexianTemp*
 .history
 .ionide
 
+### Metals ###
+.metals/
+.bloop/
+project/**/metals.sbt
+*project/
+*target/
+.scalafmt.conf
+
 # End of https://www.toptal.com/developers/gitignore/api/latex,scala,visualstudiocode,intellij,java
