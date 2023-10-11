@@ -1,3 +1,4 @@
+% LTeX: language=en-GB
 %Author(s), Course variables
 \newcommand{\titl}{02132 Assignment 2 report}
 \newcommand{\subtitl}{Hardware implementation in Chisel\\of a small CPU running the image erosion}
@@ -38,7 +39,7 @@ separate-uncertainty-units = single ,
 
 %Appendix, TOC and Bibliography
 \usepackage{appendix}
-\renewcommand\appendixtocname{Bilag}
+\renewcommand\appendixtocname{Appendix}
 \usepackage[nottoc]{tocbibind}
 \setcounter{tocdepth}{2}
 \usepackage{lastpage}
@@ -69,7 +70,7 @@ separate-uncertainty-units = single ,
 \lhead{02132 Computer Systems \lb Assignment 1 \lb November \nth{5}}
 \chead{\includegraphics[width=.05\textwidth]{DTU}}
 \rhead{\authone \ \textbf{\SIDone} \lb \authtwo \ \textbf{\SIDtwo} \lb \auththree \ \textbf{\SIDthree}}
-\cfoot{Side \thepage\, af\, \pageref*{LastPage}}
+\cfoot{Page \thepage\, of\, \pageref*{LastPage}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
 \setlength{\headheight}{36.75034pt}
@@ -195,16 +196,167 @@ separate-uncertainty-units = single ,
     \caption{Work distribution on the project}\label{tbl:ansvar}
     \begin{tabular}{lll}
         \toprule
-        Name                 & Implementation tasks & Report tasks \\
+        Name                 & Development tasks & Report tasks   \\
         \midrule
-        Mikkel Arn Andersen  &                      &              \\
-        Niclas Juul Schæffer &                      &              \\
-        Rasmus Wiuff         &                      &              \\
+        Mikkel Arn Andersen  &                   &                \\
+        Niclas Juul Schæffer &                   &                \\
+        Rasmus Wiuff         & ISA               & \cref{sec:isa} \\
         \bottomrule
     \end{tabular}
 \end{table}
 \section{Design}
-\emph{Explain here what the design process was. List and describe your ISA and how the instructions are encoded. List and describe your compiled program (put a reference to attached file if the compiled program is too long to fit here). Show and describe the bock diagram of your CPU. Motivate the design decision you made.}
+% \emph{Explain here what the design process was. List and describe your ISA and how the instructions are encoded. List and describe your compiled program (put a reference to attached file if the compiled program is too long to fit here). Show and describe the block diagram of your CPU. Motivate the design decision you made.}
+\subsection{ISA and encoding}\label{sec:isa}
+The ISA instructions are inspired from Appendix A in the assignment description. It is listed in \cref{tbl:ISA}.
+\begin{table}[H]
+    \centering
+    \caption{Instruction-set architecture used in the assignment}\label{tbl:ISA}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Instruction}  & \textbf{Syntax}          & \textbf{Meaning}                  \\
+        \midrule
+        \multicolumn{3}{c}{Arithmetic instructions}                                          \\
+        \midrule
+        Addition              & \texttt{ADD Rx, Ry, Rz;} & \texttt{Rx = Ry + Rz}             \\
+        Subtraction           & \texttt{SUB Rx, Ry, Rz;} & \texttt{Rx = Ry - Rz}             \\
+        Immediate addition    & \texttt{ADDI Rx, Ry, z;} & \texttt{Rx = Ry + z}              \\
+        Immediate subtraction & \texttt{SUBI Rx, Ry, z;} & \texttt{Rx = Ry - z}              \\
+        Multiplication        & \texttt{MUL Rx, Ry, Rz;} & \texttt{Rx = Ry \(\cdot\) Rz}     \\
+        \midrule
+        \multicolumn{3}{c}{Logic instructions}                                               \\
+        \midrule
+        Bitwise OR            & \texttt{OR Rx, Ry, Rz;}  & \texttt{Rx = Ry \(\vert\) Rz}     \\
+        Bitwise AND           & \texttt{AND Rx, Ry, Rz;} & \texttt{Rx = Ry \(\&\) Rz}        \\
+        Bitwise NOT           & \texttt{NOT Rx, Ry;}     & \texttt{Rx = \(\sim\)Ry}          \\
+        \midrule
+        \multicolumn{3}{c}{Memory instructions}                                              \\
+        \midrule
+        Load immediate        & \texttt{LI Rx, y;}       & \texttt{Rx = y}                   \\
+        Load data             & \texttt{LD Rx, Ry;}      & \texttt{Rx = memory(Ry)}          \\
+        Store data            & \texttt{SD Rx, Ry;}      & \texttt{memory(Ry) = Rx}          \\
+        \midrule
+        \multicolumn{3}{c}{Control and flow instructions}                                    \\
+        \midrule
+        Jump                  & \texttt{JMP x}           & \texttt{GOTO INST x}              \\
+        Jump if equal         & \texttt{JEQ Rx, Ry, z;}  & \texttt{if(Rx == Ry) GOTO INST z} \\
+        Jump if less than     & \texttt{JLT Rx, Ry, z;}  & \texttt{if(Rx < Ry) GOTO INST z}  \\
+        Jump if greater than  & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z}  \\
+        % Jump if zero          & \texttt{JZ Rx, y;}       & \texttt{if(Rx == 0) GOTO INST y}  \\
+        Do nothing            & \texttt{NOP;}            & \texttt{No operation}             \\
+        END                   & \texttt{END;}            & \texttt{Terminate}                \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+To design the instructions, first the bit sizes are considered. Some are given in the assignment. If there are 16 registers, these can be reached with \(\log_2{16} = 4\) bits. Values for the logic and arithmetic operations are 16 bit as well as addresses in the memory. The opcodes fit within 5 bits.\newline
+The instructions have 3 types: Register type, immediate type and jump type. They are laid out as shown in \cref{fig:inst}.
+\begin{figure}[H]
+    \centering
+    \caption{Instruction layouts.}\label{fig:inst}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \caption{Register type instruction. R1 and 2 are operands, Rd is the destination register.}\label{fig:rinst}
+        \resizebox{\textwidth}{!}{%
+            \begin{tikzpicture}
+                \draw[black, very thick] (0,0) rectangle (32,2); % INST box
+                \draw[fill=green!20] (0,0) rectangle (5,2); % OPCODE section
+                \draw[fill=red!20] (5,0) rectangle (10,2); % Reg section
+                \draw[fill=blue!20] (10,0) rectangle (15,2); % Reg section
+                \draw[fill=yellow!20] (15,0) rectangle (20,2); % Reg section
+                \draw[fill=cyan!20] (20,0) rectangle (32,2); % Value section
+                \node[align=center] (opcode) at (2,1) {\Large OPCODE (5 bits) \\ \Large 27\(\cdots\)31};
+                \node[align=center] (rd) at (7,1) {\Large Rd (5 bits) \\ \Large 22\(\cdots\)26};
+                \node[align=center] (r1) at (12,1) {\Large R1 (5 bits) \\ \Large 17\(\cdots\)21};
+                \node[align=center] (r2) at (17,1) {\Large R2 (5 bits) \\ \Large 12\(\cdots\)16};
+                % \node[align=center] (val) at (18,1) {\Large Value (16 bit) \\ \Large 0\(\cdots\)15};
+                % \node (zero) at (32,3) {\Large 0};
+                % \node (thirtytwo) at (0,3) {\Large 31};
+                % \draw[->, very thick] (zero) -- (32,2);
+                % \draw[->, very thick] (thirtytwo) -- (0,2);
+            \end{tikzpicture}
+        }%
+        \vspace{.5cm}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \caption{Immediate type instruction. R1 is an operand. Rd is the destination register. Value is the other operand.}\label{fig:iinst}
+        \resizebox{\textwidth}{!}{%
+            \begin{tikzpicture}
+                \draw[black, very thick] (0,0) rectangle (32,2); % INST box
+                \draw[fill=green!20] (0,0) rectangle (5,2); % OPCODE section
+                \draw[fill=red!20] (5,0) rectangle (10,2); % Reg section
+                \draw[fill=blue!20] (10,0) rectangle (15,2); % Reg section
+                \draw[fill=yellow!20] (15,0) rectangle (31,2); % Reg section
+                \draw[fill=cyan!20] (31,0) rectangle (32,2); % Value section
+                \node[align=center] (opcode) at (2,1) {\Large OPCODE (5 bits) \\ \Large 27\(\cdots\)31};
+                \node[align=center] (rd) at (7,1) {\Large Rd (5 bits) \\ \Large 22\(\cdots\)26};
+                \node[align=center] (r1) at (12,1) {\Large R1 (5 bits) \\ \Large 17\(\cdots\)21};
+                \node[align=center] (target) at (18,1) {\Large Value (16 bits) \\ \Large 1\(\cdots\)16};
+                % \node (zero) at (32,3) {\Large 0};
+                % \node (thirtytwo) at (0,3) {\Large 31};
+                % \draw[->, very thick] (zero) -- (32,2);
+                % \draw[->, very thick] (thirtytwo) -- (0,2);
+            \end{tikzpicture}
+        }%
+        \vspace{.5cm}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \caption{Jump type instruction. R1 and R2 are operands. Target is the target address.}\label{fig:jinst}
+        \resizebox{\textwidth}{!}{%
+            \begin{tikzpicture}
+                \draw[black, very thick] (0,0) rectangle (32,2); % INST box
+                \draw[fill=green!20] (0,0) rectangle (5,2); % OPCODE section
+                \draw[fill=red!20] (5,0) rectangle (10,2); % Reg section
+                \draw[fill=blue!20] (10,0) rectangle (15,2); % Reg section
+                \draw[fill=yellow!20] (15,0) rectangle (31,2); % Reg section
+                \draw[fill=cyan!20] (31,0) rectangle (32,2); % Value section
+                \node[align=center] (opcode) at (2,1) {\Large OPCODE (5 bits) \\ \Large 27\(\cdots\)31};
+                \node[align=center] (r1) at (7,1) {\Large R1 (5 bits) \\ \Large 22\(\cdots\)26};
+                \node[align=center] (r2) at (12,1) {\Large R2 (5 bits) \\ \Large 17\(\cdots\)21};
+                \node[align=center] (target) at (18,1) {\Large Target (16 bits) \\ \Large 1\(\cdots\)16};
+                % \node (zero) at (32,3) {\Large 0};
+                % \node (thirtytwo) at (0,3) {\Large 31};
+                % \draw[->, very thick] (zero) -- (32,2);
+                % \draw[->, very thick] (thirtytwo) -- (0,2);
+            \end{tikzpicture}
+        }%
+    \end{subfigure}
+\end{figure}
+\subsubsection{Opcodes}
+As seen in \cref{fig:inst} there are 5 bits allocated to opcodes. \cref{tbl:ISA} accounts for eight register type operations, four jump types, three immediate types and two runtime operations. The encoding scheme uses significant bits to determine the type of operation. The first bit tells if the instruction is runtime or not. Second bit tells if the instruction is of register type or jump/immediate type. For the latter the third bit determines if the instruction is of jump or immediate type. The scheme is laid out in \cref{tbl:opcode}. Using bits to determine the instruction type, designing the chip decoding becomes easier.
+
+\begin{table}[H]
+    \centering
+    \caption{OPCODE instruction bits.}\label{tbl:opcode}
+    \begin{tabular}{lll}
+        \toprule
+        Instruction type           & OPCODE bits & Instruction   \\
+        \midrule
+        \multirow{8}{*}{Register}  & 00000       & \texttt{ADD}  \\
+                                   & 00001       & \texttt{SUB}  \\
+                                   & 00010       & \texttt{MUL}  \\
+                                   & 00011       & \texttt{OR}   \\
+                                   & 00100       & \texttt{AND}  \\
+                                   & 00101       & \texttt{NOT}  \\
+                                   & 00110       & \texttt{LD}   \\
+                                   & 00111       & \texttt{SD}   \\
+        \midrule
+        \multirow{4}{*}{Jump}      & 01000       & \texttt{JMP}  \\
+                                   & 01001       & \texttt{JEQ}  \\
+                                   & 01010       & \texttt{JLT}  \\
+                                   & 01011       & \texttt{JGT}  \\
+        \midrule
+        \multirow{3}{*}{Immediate} & 01100       & \texttt{ADDI} \\
+                                   & 01101       & \texttt{SUBI} \\
+                                   & 01110       & \texttt{LI}   \\
+        \midrule
+        \multirow{2}{*}{Runtime}   & 10000       & \texttt{NOP}  \\
+                                   & 11111       & \texttt{END}  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\subsection{Compiled program}
+\subsection{CPU block}
 \section{Implementation}
 \emph{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question “What does a reader need to know about your Chisel implementation?”}
 \section{Test and analysis}
