@@ -257,27 +257,27 @@ To design the instructions, first the bit sizes are considered. Some are given i
 The instruction layout is laid out in \cref{fig:inst}.
 \begin{figure}[H]
     \centering
-        \centering
-        \caption{Instruction layout. R1 and 2 are operands, Rd is the destination register. Remaining bits are used for either memory address or immediate value.}\label{fig:inst}
-        \resizebox{\textwidth}{!}{%
-            \begin{tikzpicture}
-                \draw[black, very thick] (0,0) rectangle (32,2); % INST box
-                \draw[fill=green!20] (0,0) rectangle (4,2); % OPCODE section
-                \draw[fill=red!20] (4,0) rectangle (8,2); % Reg section
-                \draw[fill=blue!20] (8,0) rectangle (12,2); % Reg section
-                \draw[fill=yellow!20] (12,0) rectangle (16,2); % Reg section
-                \draw[fill=cyan!20] (16,0) rectangle (32,2); % Value section
-                \node[align=center] (opcode) at (2,1) {\Large OPCODE (4 bits) \\ \Large 31\(\cdots\)28};
-                \node[align=center] (rd) at (6,1) {\Large Rd (4 bits) \\ \Large 27\(\cdots\)24};
-                \node[align=center] (r1) at (10,1) {\Large R1 (4 bits) \\ \Large 23\(\cdots\)20};
-                \node[align=center] (r2) at (14,1) {\Large R2 (4 bits) \\ \Large 19\(\cdots\)16};
-                \node[align=center] (val) at (24,1) {\Large Value/address (16 bit) \\ \Large 15\(\cdots\)0};
-                % \node (zero) at (32,3) {\Large 0};
-                % \node (thirtytwo) at (0,3) {\Large 31};
-                % \draw[->, very thick] (zero) -- (32,2);
-                % \draw[->, very thick] (thirtytwo) -- (0,2);
-            \end{tikzpicture}
-        }%
+    \centering
+    \caption{Instruction layout. R1 and 2 are operands, Rd is the destination register. Remaining bits are used for either memory address or immediate value.}\label{fig:inst}
+    \resizebox{\textwidth}{!}{%
+        \begin{tikzpicture}
+            \draw[black, very thick] (0,0) rectangle (32,2); % INST box
+            \draw[fill=green!20] (0,0) rectangle (4,2); % OPCODE section
+            \draw[fill=red!20] (4,0) rectangle (8,2); % Reg section
+            \draw[fill=blue!20] (8,0) rectangle (12,2); % Reg section
+            \draw[fill=yellow!20] (12,0) rectangle (16,2); % Reg section
+            \draw[fill=cyan!20] (16,0) rectangle (32,2); % Value section
+            \node[align=center] (opcode) at (2,1) {\Large OPCODE (4 bits) \\ \Large 31\(\cdots\)28};
+            \node[align=center] (rd) at (6,1) {\Large Rd (4 bits) \\ \Large 27\(\cdots\)24};
+            \node[align=center] (r1) at (10,1) {\Large R1 (4 bits) \\ \Large 23\(\cdots\)20};
+            \node[align=center] (r2) at (14,1) {\Large R2 (4 bits) \\ \Large 19\(\cdots\)16};
+            \node[align=center] (val) at (24,1) {\Large Value/address (16 bit) \\ \Large 15\(\cdots\)0};
+            % \node (zero) at (32,3) {\Large 0};
+            % \node (thirtytwo) at (0,3) {\Large 31};
+            % \draw[->, very thick] (zero) -- (32,2);
+            % \draw[->, very thick] (thirtytwo) -- (0,2);
+        \end{tikzpicture}
+    }%
 \end{figure}
 \subsubsection{Opcodes}
 As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA} accounts for seven register type operations, four jump types, three immediate types and two runtime operations.
@@ -288,29 +288,61 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
         \toprule
         Instruction type           & OPCODE bits & Instruction   \\
         \midrule
-        \multirow{7}{*}{Register}  & 0001       & \texttt{ADD}  \\
-                                   & 0010       & \texttt{SUB}  \\
-                                   & 0011       & \texttt{OR}   \\
-                                   & 0100       & \texttt{AND}  \\
-                                   & 0101       & \texttt{NOT}  \\
-                                   & 0110       & \texttt{LD}   \\
-                                   & 0111       & \texttt{SD}   \\
+        \multirow{7}{*}{Register}  & 0001        & \texttt{ADD}  \\
+                                   & 0010        & \texttt{SUB}  \\
+                                   & 0011        & \texttt{OR}   \\
+                                   & 0100        & \texttt{AND}  \\
+                                   & 0101        & \texttt{NOT}  \\
+                                   & 0110        & \texttt{LD}   \\
+                                   & 0111        & \texttt{SD}   \\
         \midrule
-        \multirow{4}{*}{Jump}      & 1000       & \texttt{JMP}  \\
-                                   & 1001       & \texttt{JEQ}  \\
-                                   & 1010       & \texttt{JLT}  \\
-                                   & 1011       & \texttt{JGT}  \\
+        \multirow{4}{*}{Jump}      & 1000        & \texttt{JMP}  \\
+                                   & 1001        & \texttt{JEQ}  \\
+                                   & 1010        & \texttt{JLT}  \\
+                                   & 1011        & \texttt{JGT}  \\
         \midrule
-        \multirow{3}{*}{Immediate} & 1100       & \texttt{ADDI} \\
-                                   & 1101       & \texttt{SUBI} \\
-                                   & 1110       & \texttt{LI}   \\
+        \multirow{3}{*}{Immediate} & 1100        & \texttt{ADDI} \\
+                                   & 1101        & \texttt{SUBI} \\
+                                   & 1110        & \texttt{LI}   \\
         \midrule
-        \multirow{2}{*}{Runtime}   & 0000       & \texttt{NOP}  \\
-                                   & 1111       & \texttt{END}  \\
+        \multirow{2}{*}{Runtime}   & 0000        & \texttt{NOP}  \\
+                                   & 1111        & \texttt{END}  \\
         \bottomrule
     \end{tabular}
 \end{table}
-\subsection{Compiled program}
+\subsection{Compile and encode}
+\begin{listing}
+    \centering
+    \caption[short]{The program compiled to assembly}\label{lst:ass}
+    \begin{minted}{mips}
+LOAD R1 <- 0
+LOAD R2 <- 0
+ADD R8 = R1 + R2
+ADD R3 = R8 + 1
+ADD R4 = R8 + 20
+ADD R5 = R8 + 22
+ADD R6 = R8 + 41
+LOAD R3 R3
+LOAD R4 R4
+LOAD R5 R5
+LOAD R6 R6
+ADD R3 = R3 + R4
+ADD R3 = R3 + R5
+ADD R3 = R3 + R6
+ADD R7 = 0 + 21
+STORE R7 <- 255
+JEQ R3 === 1020 -> 19
+STORE R7 <- 000
+ADD R1 = R1 + 1
+JEQ R1 === 19 -> 22
+JUMP -> 3
+ADD R1 = 0 + 0
+ADD R2 = R2 + 20
+JEQ R2 === 380 -> 26
+JUMP -> 3
+END;l
+    \end{minted}
+\end{listing}
 \subsection{CPU block}
 \tikzset{ALU/.style={muxdemux, muxdemux def={
                     Lh=7, NL=2, Rh=3, NR=2, NB=0, NT=1, w=4, inset w=1, inset Lh=1, inset Rh=0, square pins=1}}}
@@ -454,35 +486,3 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
 %\input{Appendix.tex}
 
 \end{document}
-
-
-
-
-ASSEMBLY CODE
-
-1. LOAD R1 <- 0
-2. LOAD R2 <- 0
-3. ADD R8 = R1 + R2
-4. ADD R3 = R8 + 1
-5. ADD R4 = R8 + 20
-6. ADD R5 = R8 + 22
-7. ADD R6 = R8 + 41
-8. LOAD R3 R3
-9. LOAD R4 R4
-10. LOAD R5 R5
-11. LOAD R6 R6
-12. ADD R3 = R3 + R4
-13. ADD R3 = R3 + R5
-14. ADD R3 = R3 + R6
-15. ADD R7 = 0 + 21
-16. STORE R7 <- 255
-17. JEQ R3 === 1020 -> 19
-18. STORE R7 <- 000
-19. ADD R1 = R1 + 1
-20. JEQ R1 === 19 -> 22
-21. JUMP -> 3
-22. ADD R1 = 0 + 0
-23. ADD R2 = R2 + 20
-24. JEQ R2 === 380 -> 26
-25. JUMP -> 3
-26. END;l
