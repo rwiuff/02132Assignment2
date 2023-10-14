@@ -3,7 +3,7 @@ import chisel3.util._
 
 class ALU extends Module {
   val io = IO(new Bundle {
-    val f = Input(UInt(2.W))
+    val f = Input(UInt(3.W))
     val a = Input(UInt(32.W))
     val b = Input(UInt(32.W))
     val result = Output(UInt(32.W))
@@ -23,6 +23,7 @@ class ALU extends Module {
     is(1.U) {result := io.a - io.b}
     is(2.U) {result := io.a | io.b}
     is(3.U) {result := io.a & io.b}
+    is(4.U) {result := io.a > io.b}
   }
 
     //output

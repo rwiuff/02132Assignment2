@@ -44,6 +44,19 @@ class ALUTester(c: ALU) extends PeekPokeTester(c) {
   expect(c.io.overflow, true)
   step(1)
 
+// Test for Comparisons returning true
+  poke(c.io.f, 4)
+  poke(c.io.a, 2)
+  poke(c.io.b, 1)
+  expect(c.io.result, 1)
+  step(1)
+
+  // Test for Comparisons returning true
+  poke(c.io.f, 4)
+  poke(c.io.a, 2)
+  poke(c.io.b, 3)
+  expect(c.io.result, 0)
+  step(1)
 }
 
 object ALUTest extends App {
