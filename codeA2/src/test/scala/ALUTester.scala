@@ -51,7 +51,7 @@ class ALUTester(c: ALU) extends PeekPokeTester(c) {
   expect(c.io.result, 1)
   step(1)
 
-  // Test for Comparisons returning true
+  // Test for Comparisons returning false
   poke(c.io.f, 4)
   poke(c.io.a, 2)
   poke(c.io.b, 3)
