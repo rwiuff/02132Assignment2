@@ -109,7 +109,7 @@ separate-uncertainty-units = single ,
 \usepackage{todonotes}
 \usepackage[square, longnamesfirst, numbers]{natbib}
 \usepackage{empheq}
-% \usepackage[newfloat, outputdir=../]{minted} % Overleaf minted buildpath fix
+% \usepackage[newfloat, outputdir=/]{minted} % Overleaf minted buildpath fix
 \usepackage[newfloat]{minted}
 \setminted{fontsize=\small,
            linenos=true}
@@ -342,7 +342,7 @@ ADD R1 = 0 + 0
 ADD R2 = R2 + 20
 JEQ R2 === 380 -> 26
 JUMP -> 3
-END;l
+END;
     \end{minted}
 \end{listing}
 \begin{landscape}
