@@ -70,7 +70,8 @@ separate-uncertainty-units = single ,
 \usetikzlibrary{positioning}
 \newcommand{\pin}[3]{\node[blue, font = \small, #2] at (#1) {#3};
                      \coordinate (#3) at (#1);}
-
+\newcommand{\port}[4]{\node[circ, #2] (#1) {};
+                     \node[#3] at (#1) {#4};}
 %Header footer
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -357,7 +358,7 @@ END;l
     \tikzset{REG/.style={muxdemux, muxdemux def={
                         Lh = 6, Rh = 6, w = 6, NL = 5, NR = 2, NT = 0, NB = 0}}}
     \tikzset{CU/.style={muxdemux, muxdemux def={
-                        Lh = 6, Rh = 6, w = 6, NL = 1, NR = 7, NT = 0, NB = 2}}}
+                        Lh = 6, Rh = 6, w = 6, NL = 1, NR = 6, NT = 0, NB = 2}}}
     \tikzset{MUX/.style={muxdemux, muxdemux def={
                         Lh=5, NL=2, Rh=2, NR=1, NB=0, NT=1, w=2, inset w=0, inset Lh=0, inset Rh=0, square pins=1}}}
     \begin{figure}[H]
@@ -415,7 +416,7 @@ END;l
                 \pin{cu.rpin 1}{above right}{writeRegister}
                 \coordinate (step2) at (5.5,0);
                 \node[MUX, right = 4 of reg.rpin 2, anchor = lpin 1] (alumux) {\ttfamily MUX};
-                \pin{cu.rpin 6}{above right}{immediateOperand}
+                \pin{cu.rpin 5}{above right}{immediateOperand}
                 \node at (reg.rpin 1 -| alumux.tpin 1) [jump crossing] (i) {};
                 \node at (reg.rpin 1 -| step2) [jump crossing] (regacross) {};
                 \coordinate (ramwrite) at (2.5,0);
@@ -436,9 +437,9 @@ END;l
                 \draw (mem1.east) -- (regacross.west);
                 \draw (regacross.east) |- (i.west);
                 \draw (i.east) -| (alu.lpin 1);
-                \draw (cu.rpin 6) -| (i.north);
-                \draw (cu.rpin 7) -| (regacross.north);
-                \pin{cu.rpin 7}{above right}{immediateLoad}
+                \draw (cu.rpin 5) -| (i.north);
+                \draw (cu.rpin 6) -| (regacross.north);
+                \pin{cu.rpin 6}{above right}{immediateLoad}
                 \draw (i.south) -- (alumux.tpin 1);
                 \node at (reg.rpin 2 -| step2) [jump crossing] (j) {};
                 \draw (reg.rpin 2) -- (rambcross.west);
@@ -449,11 +450,10 @@ END;l
                 \draw (alumux.rpin 1) |- (alu.lpin 2);
                 \pin{alumux.lpin 1}{below}{0}
                 \pin{alumux.lpin 2}{above}{1}
-                \draw (cu.rpin 5) -| (alu.tpin 1);
-                \pin{cu.rpin 5}{above right}{aluFunc}
+                \draw (cu.rpin 4) -| (alu.tpin 1);
+                \pin{cu.rpin 4}{above right}{aluFunc}
                 \pin{cu.rpin 2}{above right}{stop}
-                \pin{cu.rpin 3}{above right}{run}
-                \pin{cu.rpin 4}{above right}{jump}
+                \pin{cu.rpin 3}{above right}{jump}
                 \coordinate (step4) at (-14.5,0);
                 \coordinate (step5) at (-16.5,0);
                 \coordinate (step6) at (-17,0);
@@ -461,13 +461,14 @@ END;l
                 \node at (step4 |- pc.lpin 3) [jump crossing] (k) {};
                 \node at (step4 |- pc.lpin 4) [jump crossing] (l) {};
                 \node at (step5 |- pc.lpin 2) [jump crossing] (j1) {};
-                \node at (step6 |- pc.lpin 2) [jump crossing] (j2) {};
                 \draw (h.east) -- (pc.lpin 2);
                 \draw (cu.rpin 2) -| (4,7) -| (-16.5,5) |- (j1.north);
                 \draw (j1.south) |- (k.west);
                 \draw (k.east) -- (pc.lpin 3);
-                \draw (cu.rpin 3) -| (4.5,7.5) -| (-17,5) |- (j2.north);
-                \draw (j2.south) |- (l.west);
+                \port{done}{left = 4 of pc.lpin 3}{left}{done}
+                \port{run}{left = 4 of pc.lpin 4}{left}{run}
+                \draw (done) -- (j1 |- pc.lpin 3);
+                \draw (run) -- (l.west);
                 \draw (l.east) -- (pc.lpin 4);
                 \draw (pc.rpin 1) |- (-13.3,2) -- (-13.3,-2) -| (rom.rpin 2);
                 \node at (-7,0) [jump crossing] (m) {};
@@ -486,11 +487,11 @@ END;l
                 \draw (x.west) -- (z.east);
                 \draw (z.west) -- (m.east);
                 \node[MUX, below = 1 of n.south, anchor = tpin 1] (immediateMux) {\ttfamily MUX};
-                \coordinate (aluOutCoord) at (15,0);
+                \coordinate (aluOutCoord) at (13.5,0);
                 \node at (alu.rpin 1 -| aluOutCoord) [jump crossing] (aluOutCross) {};
                 \node at (alumux |- immediateMux.lpin 2) [jump crossing] (immediateMuxCross) {};
                 \draw (alu.rpin 1) -- (aluOutCross.west);
-                \draw (aluOutCross.east) |- (immediateMuxCross.east);
+                \draw (aluOutCross.east) -- ++(1.2,0) |- (immediateMuxCross.east);
                 \draw (immediateMuxCross.west) -| (6.5,-6.7) -| (immediateMux.lpin 2);
                 \draw (n.south) -- (immediateMux.tpin 1);
                 \draw (n -| immediateMux.lpin 1) |- (immediateMux.lpin 1);
@@ -504,12 +505,11 @@ END;l
                 \coordinate (jumpcoord) at (-8,0);
                 \draw (rom.rpin 1 -| jumpcoord) -- (-8, -2.5);
                 \node[above] at (-10.2,-3) {instruction[15..0]};
-                \node [or port, right = 4 of cu.rpin 3, anchor = in 2] (or) {\ttfamily OR};
+                \node [or port, right = 4 of cu.rpin 2, anchor = in 2] (or) {\ttfamily OR};
                 \draw (alu.rpin 2) -| (aluOutCross.south);
-                \draw (aluOutCross.north) |- (7,4.3) -| (or.in 2);
-                \draw (cu.rpin 4) -| (5.5,5) |- (or.in 1);
-                \draw (or.out) |- (5,8) -| (-17.5,5.5) |- (j2.west);
-                \draw (j2.east) -- (j1.west);
+                \draw (aluOutCross.north) |- (or.in 2 |- cu.rpin 3) -| (or.in 2);
+                \draw (cu.rpin 3) -| (5.5,5) |- (or.in 1);
+                \draw (or.out) |- (5,8) -| (-17.5,5.5) |- (j1.west);
                 \draw (j1.east) -- (h.west);
                 \pin{cu.bpin 1}{left}{writeToMemory}
                 \draw (cu.bpin 1) |- (2,2);
@@ -527,7 +527,7 @@ END;l
                 \draw (ram1.south) |- (-4.5,-2.5) |- (ram.lpin 3);
                 \draw (ram2.south) |- (-4,-3) |- (ram.lpin 2);
                 \draw (ram3.south) |- (-3.5,-3.5) |- (ram.lpin 1);
-                \pin{cu.bpin 2}{below}{LoadFromMemory}
+                \pin{cu.bpin 2}{below}{loadFromMemory}
                 \draw (cu.bpin 2) -| (mem1.north);
                 \draw (mem1.south) -- (mem2.north);
                 \draw (mem2.south) -- (mem3.north);
