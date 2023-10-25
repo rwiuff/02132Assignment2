@@ -317,13 +317,13 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
     \centering
     \caption[short]{The program compiled to assembly}\label{lst:ass}
     \begin{minted}{mips}
-LOAD R1 <- 0
-LOAD R2 <- 0
-ADD R8 = R1 + R2
-ADD R3 = R8 + 1
-ADD R4 = R8 + 20
-ADD R5 = R8 + 22
-ADD R6 = R8 + 41
+LOADI R1, 0;
+LOADI R2, 0;
+ADD R8, R1, R2;
+ADDI R3, R8, 1;
+ADDI R4, R8, 20;
+ADDI R5, R8, 22;
+ADDI R6, R8, 41;
 LOAD R3 R3
 LOAD R4 R4
 LOAD R5 R5
