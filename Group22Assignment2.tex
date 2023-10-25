@@ -239,9 +239,10 @@ The ISA instructions are inspired from Appendix A in the assignment description.
         \midrule
         \multicolumn{3}{c}{Memory instructions}                                              \\
         \midrule
-        Load immediate        & \texttt{LI Rx, y;}       & \texttt{Rx = y}                   \\
-        Load data             & \texttt{LD Rx, Ry;}      & \texttt{Rx = memory(Ry)}          \\
-        Store data            & \texttt{SD Rx, Ry;}      & \texttt{memory(Ry) = Rx}          \\
+        Load immediate        & \texttt{LOADI Rx, y;}    & \texttt{Rx = y}                   \\
+        Load data             & \texttt{LOAD Rx, Ry;}    & \texttt{Rx = memory(Ry)}          \\
+        Store data            & \texttt{STORE Rx, Ry;}   & \texttt{memory(Ry) = Rx}          \\
+        Move data             & \texttt{MOV Rx, Ry;}     & \texttt{Rx = Ry}                  \\
         \midrule
         \multicolumn{3}{c}{Control and flow instructions}                                    \\
         \midrule
@@ -361,9 +362,12 @@ END;
                         Lh = 6, Rh = 6, w = 6, NL = 1, NR = 5, NT = 2, NB = 2}}}
     \tikzset{MUX/.style={muxdemux, muxdemux def={
                         Lh=5, NL=2, Rh=2, NR=1, NB=0, NT=1, w=2, inset w=0, inset Lh=0, inset Rh=0, square pins=1}}}
+    \ctikzset{bipoles/crossing/size=.3}
+    \tikzset{PAD/.style={muxdemux, muxdemux def={
+                        Lh = 2, Rh = 2, w = 3, NL = 0, NR = 0, NT = 2, NB = 0}}}
     \begin{figure}[H]
         \centering
-        \caption{Block diagram of the CPU architecture.}\label{fig:cpu}
+        \caption{Block diagram of the CPU architecture. Blue lines are control signals.}\label{fig:cpu}
         \resizebox{1.4\textwidth}{!}{
             \begin{circuitikz}
                 % \draw [help lines,dashed] (-15,-10) grid (10,10);
@@ -384,7 +388,7 @@ END;
                 \pin{alu.lpin 2}{below left}{operand 2}
                 \pin{alu.tpin 1}{right}{sel}
                 \pin{alu.rpin 1}{right}{result}
-                \node[ROM, left = 8 of reg, align=left] (rom) {\ttfamily Program \\ \ttfamily Memory};
+                \node[ROM, left = 8 of reg.lpin 2, anchor=rpin 1, align=left] (rom) {\ttfamily Program \\ \ttfamily Memory};
                 \pin{rom.rpin 1}{above right}{instructionRead}
                 \pin{rom.rpin 2}{right}{address}
                 \node[PC, above = 1 of rom, align=left] (pc) {\ttfamily Program \\ \ttfamily Counter};
@@ -395,9 +399,13 @@ END;
                 \node[blue, font = \small, right, align=left] at (pc.rpin 1) {program\\Counter};
                 \coordinate (step0) at (-6,2);
                 \coordinate (step1) at (-6.5,0);
-                \node at (rom.rpin 1 -| step1) [jump crossing] (y) {};
-                \draw (rom.rpin 1) -- (y.west);
-                \draw (y.east) -- (rom.rpin 1 -| step0);
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (reg.lpin 2 -| step1) [jump crossing] (y) {};
+                \end{scope}
+                \coordinate (step3) at (-8,0);
+                \draw (rom.rpin 1) -- (step3 |- rom.rpin 1) to[multiwire=32] (y.west);
+                \draw (y.east) -- (reg.lpin 2 -| step0);
                 \draw (rom.rpin 1 -| step0) -- (step0 |- cu.lpin 1) -- (cu.lpin 1);
                 \node[below left = .1 of cu.lpin 1] {instruction[31..28]};
                 \draw (reg.lpin 1 -| step0) -- (reg.lpin 1);
@@ -408,116 +416,139 @@ END;
                 \node[above] at (-4.5,1.3) {instruction[23..20]};
                 \node[above] at (-4.5,.6) {instruction[19..16]};
                 \node[above] at (-4.5,-.8) {instruction[27..24]};
-                \node at (x -| y) [jump crossing] (z) {};
-                \draw (cu.tpin 1) |- (-6,7) -| (y.north);
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (x -| y) [jump crossing] (z) {};
+                \end{scope}
+                \draw[blue] (cu.tpin 1) |- (-6,7) -| (y.north);
                 \pin{cu.tpin 1}{left}{writeToRegister}
-                \draw (y.south) |- (z.north);
-                \draw (z.south) |- (reg.lpin 5);
-                \coordinate (step2) at (5.5,0);
+                \draw[blue] (y.south) |- (z.north);
+                \draw[blue] (z.south) |- (reg.lpin 5);
+                \coordinate (step2) at (5,0);
                 \node[MUX, right = 4 of reg.rpin 2, anchor = lpin 1] (alumux) {\ttfamily MUX};
                 \pin{cu.rpin 4}{above right}{immediateOperand}
-                \node at (reg.rpin 1 -| alumux.tpin 1) [jump crossing] (i) {};
-                \node at (reg.rpin 1 -| step2) [jump crossing] (regacross) {};
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (reg.rpin 1 -| alumux.tpin 1) [jump crossing] (i) {};
+                    \node at (reg.rpin 1 -| step2) [jump crossing] (regacross) {};
+                \end{scope}
                 \coordinate (ramwrite) at (2.5,0);
                 \coordinate (ramdata) at (3,0);
                 \coordinate (ramaddress) at (3.5,0);
                 \coordinate (memory) at (4,0);
-                \node at (ramwrite |- reg.rpin 1) [jump crossing] (ramacross) {};
-                \node at (ramwrite |- reg.rpin 2) [jump crossing] (rambcross) {};
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (ramwrite |- reg.rpin 1) [jump crossing] (ramacross) {};
+                    \node at (ramwrite |- reg.rpin 2) [jump crossing] (rambcross) {};
+                    \node at (ramwrite |- alumux.lpin 2) [jump crossing] (ram1) {};
+                \end{scope}
                 \node at (ramaddress |- reg.rpin 2) [jump crossing] (databcross) {};
-                \node at (ramwrite |- alumux.lpin 2) [jump crossing] (ram1) {};
                 \node at (ramdata |- alumux.lpin 2) [jump crossing] (ram2) {};
                 \node at (ramaddress |- alumux.lpin 2) [jump crossing] (ram3) {};
-                \node at (memory |- reg.rpin 1) [jump crossing] (mem1) {};
-                \node at (memory |- reg.rpin 2) [jump crossing] (mem2) {};
-                \node at (memory |- alumux.lpin 2) [jump crossing] (mem3) {};
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (memory |- reg.rpin 1) [jump crossing] (mem1) {};
+                    \node at (memory |- reg.rpin 2) [jump crossing] (mem2) {};
+                    \node at (memory |- alumux.lpin 2) [jump crossing] (mem3) {};
+                \end{scope}
                 \draw (reg.rpin 1) -- (ramacross.west);
-                \draw (ramacross.east) -- (mem1.west);
+                \draw (ramacross.east) to[multiwire=32] (mem1.west);
                 \draw (mem1.east) -- (regacross.west);
                 \draw (regacross.east) |- (i.west);
                 \draw (i.east) -| (alu.lpin 1);
-                \draw (cu.rpin 4) -| (i.north);
-                \draw (cu.rpin 5) -| (regacross.north);
+                \draw[blue] (cu.rpin 4) -| (i.north);
+                \draw[blue] (cu.rpin 5) -| (regacross.north);
                 \pin{cu.rpin 5}{above right}{immediateLoad}
-                \draw (i.south) -- (alumux.tpin 1);
-                \node at (reg.rpin 2 -| step2) [jump crossing] (j) {};
+                \draw[blue] (i.south) -- (alumux.tpin 1);
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (reg.rpin 2 -| step2) [jump crossing] (j) {};
+                \end{scope}
                 \draw (reg.rpin 2) -- (rambcross.west);
-                \draw (rambcross.east) -- (databcross.west);
+                \draw (rambcross.east) to[multiwire=32] (databcross.west);
                 \draw (databcross.east) -- (mem2.west);
                 \draw (mem2.east) -- (j.west);
                 \draw (j.east) -- (alumux.lpin 1);
                 \draw (alumux.rpin 1) |- (alu.lpin 2);
                 \pin{alumux.lpin 1}{below}{0}
                 \pin{alumux.lpin 2}{above}{1}
-                \draw (cu.rpin 3) -| (alu.tpin 1);
+                \draw[blue] (cu.rpin 3) -| (alu.tpin 1 |- cu.rpin 4) to[multiwire=3] (alu.tpin 1);
                 \pin{cu.rpin 3}{above right}{aluFunc}
                 \pin{cu.tpin 2}{left}{stop}
                 \pin{cu.rpin 2}{above right}{jump}
-                \coordinate (step4) at (-14.5,0);
-                \coordinate (step5) at (-16.5,0);
-                \coordinate (step6) at (-17,0);
+                \coordinate (step4) at (-15,0);
+                \coordinate (step5) at (-17,0);
                 \node at (step4 |- pc.lpin 2) [jump crossing] (h) {};
-                \node at (step4 |- pc.lpin 3) [jump crossing] (k) {};
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=black}
+                    \node[blue] at (step4 |- pc.lpin 3) [jump crossing] (k) {};
+                \end{scope}
                 \node at (step4 |- pc.lpin 4) [jump crossing] (l) {};
-                \node at (step5 |- pc.lpin 2) [jump crossing] (j1) {};
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (step5 |- pc.lpin 2) [jump crossing] (j1) {};
+                \end{scope}
                 \draw (h.east) -- (pc.lpin 2);
-                \draw (cu.tpin 2) |- (0,7.5) -| (-16.5,5) |- (j1.north);
-                \draw (j1.south) |- (k.west);
-                \draw (k.east) -- (pc.lpin 3);
+                \draw[blue] (cu.tpin 2) |- (0,7.5) -| (-17,5) |- (j1.north);
+                \draw[blue] (j1.south) |- (k.west);
+                \draw[blue] (k.east) -- (pc.lpin 3);
                 \port{done}{left = 4 of pc.lpin 3}{left}{done}
                 \port{run}{left = 4 of pc.lpin 4}{left}{run}
-                \draw (done) -- (j1 |- pc.lpin 3);
+                \draw[blue] (done) -- (j1 |- pc.lpin 3);
                 \draw (run) -- (l.west);
                 \draw (l.east) -- (pc.lpin 4);
-                \draw (pc.rpin 1) |- (-13.3,2) -- (-13.3,-2) -| (rom.rpin 2);
+                \draw (pc.rpin 1) |- (-14.5,2) to[multiwire=16] (-14.5,-2.3) -| (rom.rpin 2);
                 \node at (-7,0) [jump crossing] (m) {};
                 \draw (rom.rpin 1 -| m) -- (m.north);
-                \node at (alumux.lpin 2 -| j) [jump crossing] (n) {};
-                \draw (regacross.south) -- (j.north);
-                \draw (j.south) -- (n.north);
-                \draw (m.south) |- (ram1.west);
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (alumux.lpin 2 -| j) [jump crossing] (n) {};
+                \end{scope}
+                \draw[blue] (regacross.south) -- (j.north);
+                \draw[blue] (j.south) -- (n.north);
+                \node[PAD, align=left, below = 2.5 of m, anchor = tpin 1] (padder) {\ttfamily Extender};
+                \draw (m.south) |- (-7,-2) to[multiwire=16] (padder.tpin 1);
+                \draw (padder.tpin 2) -- (padder.tpin 2 |- ram1.west) to[multiwire=32] (ram1.west);
                 \draw (ram1.east) -- (ram2.west);
                 \draw (ram2.east) -- (ram3.west);
                 \draw (ram3.east) -- (mem3.west);
                 \draw (mem3.east) -- (n.west);
                 \draw (n.east) -- (alumux.lpin 2);
-                \node at (-4, -2) {instruction[15..0]};
+                \node[right] at (-7, -1.6) {instruction[15..0]};
                 \draw (reg.lpin 3) -- (x.east);
                 \draw (x.west) -- (z.east);
                 \draw (z.west) -- (m.east);
-                \node[MUX, below = 1 of n.south, anchor = tpin 1] (immediateMux) {\ttfamily MUX};
-                \node at (alumux |- immediateMux.lpin 2) [jump crossing] (immediateMuxCross) {};
-                \draw (immediateMuxCross.west) -| (6.5,-6.7) -| (immediateMux.lpin 2);
-                \draw (n.south) -- (immediateMux.tpin 1);
+                \node[MUX, below = 1 of n.south, anchor = tpin 1, xscale=-1] (immediateMux) {\ctikzflipx{\ttfamily MUX}};
+                \draw[blue] (n.south) -- (immediateMux.tpin 1);
                 \draw (n -| immediateMux.lpin 1) |- (immediateMux.lpin 1);
-                \draw (alu.rpin 1) |- (immediateMuxCross.east);
+                \draw (alu.rpin 1) to[multiwire=32] (alu.rpin 1 |- immediateMux.lpin 2) |- (immediateMux.lpin 2);
                 \pin{immediateMux.lpin 1}{below}{1}
                 \pin{immediateMux.lpin 2}{above}{0}
-                \draw (immediateMux.rpin 1) -| (immediateMuxCross.north);
+                \draw (immediateMux.rpin 1) |- (-9,-9);
                 \draw (pc.lpin 1) -| (h.north);
                 \draw (h.south) -- (k.north);
                 \draw (k.south) -- (l.north);
-                \draw (l.south) |- (-8, -2.5);
-                \coordinate (jumpcoord) at (-8,0);
-                \draw (rom.rpin 1 -| jumpcoord) -- (-8, -2.5);
-                \node[above] at (-10.2,-3) {instruction[15..0]};
+                \draw (l.south) |- (-8.8, -3);
+                \coordinate (jumpcoord) at (-8.8,0);
+                \draw (rom.rpin 1 -| jumpcoord) -- (-8.8, -3);
+                \node[left] at (-15,0) {instruction[15..0]};
                 \node [and port, right = 3.5 of cu.rpin 1, anchor = in 2] (and) {\ttfamily AND};
-                \draw (alu.rpin 1) |- (6,5.5) -| (and.in 2);
-                \draw (cu.rpin 2) -| (5,6) |- (and.in 1);
+                \draw (alu.rpin 1) to[multiwire=32] (alu.rpin 1 |- cu.rpin 2) -| (and.in 2);
+                \draw[blue] (cu.rpin 2) -| (5,6) |- (and.in 1);
                 \node[MUX, right = .5 of and, anchor = lpin 2] (jmpMux) {\ttfamily MUX};
                 \draw (and.out) -- (jmpMux.lpin 2);
-                \draw (and.in 1) |- (jmpMux.lpin 1);
+                \draw[blue] (and.in 1) |- (jmpMux.lpin 1);
                 \pin{jmpMux.lpin 1}{below}{1}
                 \pin{jmpMux.lpin 2}{above}{0}
                 \pin{cu.rpin 1}{above right}{immediateJump}
-                \draw (cu.rpin 1) -| (4.5,7) |- (jmpMux.tpin 1);
+                \draw[blue] (cu.rpin 1) -| (4.5,7) |- (jmpMux.tpin 1);
                 \draw (jmpMux.rpin 1) |- (0,9.5) -| (-17.5,5.5) |- (j1.west);
                 \draw (j1.east) -- (h.west);
                 \pin{cu.bpin 1}{left}{writeToMemory}
-                \draw (cu.bpin 1) |- (2,2);
-                \draw (2,2) -| (ramacross.north);
-                \draw (ramacross.south) -- (rambcross.north);
-                \draw (rambcross.south) -- (ram1.north);
+                \draw[blue] (cu.bpin 1) |- (2,2);
+                \draw[blue] (2,2) -| (ramacross.north);
+                \draw[blue] (ramacross.south) -- (rambcross.north);
+                \draw[blue] (rambcross.south) -- (ram1.north);
                 \draw (reg.rpin 1 -| ramaddress) -- (databcross.north);
                 \draw (databcross.south) -- (ram3.north);
                 \draw (reg.rpin 2 -| ramdata) -- (ram2.north);
@@ -526,26 +557,28 @@ END;
                 \pin{ram.lpin 2}{above left}{address}
                 \pin{ram.lpin 3}{above left}{writeEnable}
                 \pin{ram.rpin 1}{above right}{dataRead}
-                \draw (ram1.south) |- (-4.5,-2.5) |- (ram.lpin 3);
+                \node[below] at (-3,-5.8) {b[15..0]};
+                \draw[blue] (ram1.south) |- (-4.5,-2.5) |- (ram.lpin 3);
                 \draw (ram2.south) |- (-4,-3) |- (ram.lpin 2);
                 \draw (ram3.south) |- (-3.5,-3.5) |- (ram.lpin 1);
                 \pin{cu.bpin 2}{right}{loadFromMemory}
-                \draw (cu.bpin 2) |- (1,2.5) -| (mem1.north);
-                \draw (mem1.south) -- (mem2.north);
-                \draw (mem2.south) -- (mem3.north);
-                \node at (-7.5,-4.5) [jump crossing] (writeX) {};
-                \node[MUX, left = 1 of writeX, anchor = tpin 1] (writeMux) {\ttfamily MUX};
-                \node at (-7, -8) [jump crossing] (writeMuxX) {};
+                \draw[blue] (cu.bpin 2) |- (1,2.5) -| (mem1.north);
+                \draw[blue] (mem1.south) -- (mem2.north);
+                \draw[blue] (mem2.south) -- (mem3.north);
+                \node[MUX, rotate=90, yscale=-1] at (-8.5,-6.5) (writeMux) {{\rotatebox[origin=c]{-90}{\ttfamily XUM}}};
+                \begin{scope}
+                    \ctikzset{crossing vertical/.cd, color=blue}
+                    \node at (-6.5, -8) [jump crossing] (writeMuxX) {};
+                \end{scope}
                 \draw (ram.rpin 1) |- (-6,-8) -| (writeMuxX.east);
-                \draw (writeMuxX.west) -| (writeMux.lpin 2);
-                \draw (mem3.south) |- (-6,-8.5) -| (writeMuxX.south);
-                \draw (writeMuxX.north) |- (writeX.east);
-                \draw (writeX.west) -- (writeMux.tpin 1);
-                \draw (immediateMuxCross.south) |- (-10,-9) |- (writeMux.lpin 1);
-                \draw (writeMux.rpin 1) -| (writeX.south);
-                \draw (writeX.north) |- (m.west);
-                \pin{writeMux.lpin 1}{below}{0}
-                \pin{writeMux.lpin 2}{above}{1}
+                \draw (writeMuxX.west) -| (writeMux.lpin 1);
+                \draw[blue] (mem3.south) |- (-6,-8.5) -| (writeMuxX.south);
+                \draw[blue] (writeMuxX.north) |- (writeMux.tpin 1);
+                \draw (-9,-9) -| (writeMux.lpin 2);
+                \draw (writeMux.rpin 1) |- (m.west);
+                \pin{writeMux.lpin 1}{left}{0}
+                \pin{writeMux.lpin 2}{right}{1}
+                \node[below] at (6.5,5.5) {result[0]};
             \end{circuitikz}
         }
     \end{figure}
