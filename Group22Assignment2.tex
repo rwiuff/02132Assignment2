@@ -229,29 +229,29 @@ The ISA instructions are inspired from Appendix A in the assignment description.
         Subtraction              & \texttt{SUB Rx, Ry, Rz;} & \texttt{Rx = Ry - Rz}             \\
         Immediate addition       & \texttt{ADDI Rx, Ry, z;} & \texttt{Rx = Ry + z}              \\
         Immediate subtraction    & \texttt{SUBI Rx, Ry, z;} & \texttt{Rx = Ry - z}              \\
-        Immediate multiplication & \texttt{MULI Rx, Ry, z;} & \texttt{Rx = Ry \(\cdot\) z}      \\
+        Immediate multiplication & \texttt{MULT Rx, Ry, z;} & \texttt{Rx = Ry \(\cdot\) z}      \\
         Increment                & \texttt{INC, Rx}         & \texttt{Rx = Rx + 1}              \\
         \midrule
         \multicolumn{3}{c}{Logic instructions}                                                  \\
         \midrule
         Bitwise OR               & \texttt{OR Rx, Ry, Rz;}  & \texttt{Rx = Ry \(\vert\) Rz}     \\
-        Bitwise AND              & \texttt{AND Rx, Ry, Rz;} & \texttt{Rx = Ry \(\&\) Rz}        \\
-        Bitwise NOT              & \texttt{NOT Rx, Ry;}     & \texttt{Rx = \(\sim\)Ry}          \\
+        % Bitwise AND              & \texttt{AND Rx, Ry, Rz;} & \texttt{Rx = Ry \(\&\) Rz}        \\
+        % Bitwise NOT              & \texttt{NOT Rx, Ry;}     & \texttt{Rx = \(\sim\)Ry}          \\
         \midrule
         \multicolumn{3}{c}{Memory instructions}                                                 \\
         \midrule
         Load immediate           & \texttt{LOADI Rx, y;}    & \texttt{Rx = y}                   \\
         Load data                & \texttt{LOAD Rx, Ry;}    & \texttt{Rx = memory(Ry)}          \\
         Store data               & \texttt{STORE Rx, Ry;}   & \texttt{memory(Ry) = Rx}          \\
-        Move data                & \texttt{MOVE Rx, Ry;}    & \texttt{Rx = Ry}                  \\
+        % Move data                & \texttt{MOVE Rx, Ry;}    & \texttt{Rx = Ry}                  \\
         \midrule
         \multicolumn{3}{c}{Control and flow instructions}                                       \\
         \midrule
         Jump                     & \texttt{JMP x}           & \texttt{GOTO INST x}              \\
         Jump if equal            & \texttt{JEQ Rx, Ry, z;}  & \texttt{if(Rx == Ry) GOTO INST z} \\
-        Jump if less than        & \texttt{JLT Rx, Ry, z;}  & \texttt{if(Rx < Ry) GOTO INST z}  \\
-        Jump if greater than     & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z}  \\
-        % Jump if zero          & \texttt{JZ Rx, y;}       & \texttt{if(Rx == 0) GOTO INST y}  \\
+        % Jump if less than        & \texttt{JLT Rx, Ry, z;}  & \texttt{if(Rx < Ry) GOTO INST z}  \\
+        % Jump if greater than     & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z}  \\
+        % Jump if zero             & \texttt{JZ Rx, y;}       & \texttt{if(Rx == 0) GOTO INST y}  \\
         Do nothing               & \texttt{NOP;}            & \texttt{No operation}             \\
         END                      & \texttt{END;}            & \texttt{Terminate}                \\
         \bottomrule
@@ -288,95 +288,104 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
 \begin{table}[H]
     \centering
     \caption{OPCODE instruction bits.}\label{tbl:opcode}
-    \begin{tabular}{lll}
+    \begin{tabular}{ll}
         \toprule
-        Instruction type           & OPCODE bits & Instruction   \\
+        OPCODE bits & Instruction    \\
         \midrule
-        \multirow{7}{*}{Register}  & 0001        & \texttt{ADD}  \\
-                                   & 0010        & \texttt{SUB}  \\
-                                   & 0011        & \texttt{OR}   \\
-                                   & 0100        & \texttt{AND}  \\
-                                   & 0101        & \texttt{NOT}  \\
-                                   & 0110        & \texttt{LD}   \\
-                                   & 0111        & \texttt{SD}   \\
-        \midrule
-        \multirow{4}{*}{Jump}      & 1000        & \texttt{JMP}  \\
-                                   & 1001        & \texttt{JEQ}  \\
-                                   & 1010        & \texttt{JLT}  \\
-                                   & 1011        & \texttt{JGT}  \\
-        \midrule
-        \multirow{3}{*}{Immediate} & 1100        & \texttt{ADDI} \\
-                                   & 1101        & \texttt{SUBI} \\
-                                   & 1110        & \texttt{LI}   \\
-        \midrule
-        \multirow{2}{*}{Runtime}   & 0000        & \texttt{NOP}  \\
-                                   & 1111        & \texttt{END}  \\
+        0001        & \texttt{ADD}   \\
+        0010        & \texttt{SUB}   \\
+        0011        & \texttt{ADDI}  \\
+        0100        & \texttt{SUBI}  \\
+        0101        & \texttt{MULT}  \\
+        0110        & \texttt{INC}   \\
+        0111        & \texttt{OR}    \\
+        1000        & \texttt{LOADI} \\
+        1001        & \texttt{LOAD}  \\
+        1010        & \texttt{STORE} \\
+        1011        & \texttt{JMP}   \\
+        1100        & \texttt{JEQ}   \\
+        % 1101        & \texttt{} \\
+        % 1110        & \texttt{}   \\
+        0000        & \texttt{NOP}   \\
+        1111        & \texttt{END}   \\
         \bottomrule
     \end{tabular}
 \end{table}
 \subsection{Compile and encode}
-\begin{listing}[p]
-    \centering
-    \caption{The program compiled to assembly}\label{lst:ass}
-    \begin{minted}[firstnumber = 0]{mips}
-LOADI R0, 0; // Initial values; x counter
-LOADI R1, 0; // y counter
-LOADI R2, 19; // Pixel limit
-LOADI R3, 0; // Zero value
-LOADI R4, 255; // 255 value
-JEQ R0, R2, 55 // For conditions; Check x, GOTO program termination
-JEQ R1, R2, 52 // Check y, GOTO incrementation of x
-JEQ R0, R3, 45 // Process border pixel; If x = 0, zerorise
-JEQ R1, R3, 45 // If y = 0, zerorise
-JEQ R0, R4, 45 // If x = 19, zerorise
-JEQ R1, R4, 45 // If y = 19, zerorise
-MULI R5, R1, 20; // y * 20
-ADD R6, R0, R5; // x + y * 200
-LOAD R8, R6; // Get input image pixel
-JEQ R8, R3, 40; // Check if 0, GOTO pixel zerorising
-SUBI R9, R0, 1 // x - 1
-ADDI R10, R0, 1 // x + 1
-SUBI R11, R1, 1 // y - 1
-ADDI R12, R1, 1 // y + 1
-MULI R5, R1, 20; // y * 20
-ADD R6, R9, R5; // (x - 1) + y * 200
-LOAD R13, R6; // Save pixel in R13
-MULI R5, R1, 20; // y * 20
-ADD R6, R10, R5; // (x + 1) + y * 200
-LOAD R14, R6; // Save pixel in R14
-OR R15, R13, R14; // OR R13 and R14, save to R15
-MULI R5, R11, 20; // (y - 1) * 20
-ADD R6, R0, R5; // x + (y - 1) * 200
-LOAD R13, R6; // Save pixel in R13
-OR R14, R13, R15; // OR R15 nad R13, save to R14
-MULI R5, R12, 20; // (y + 1) * 20
-ADD R6, R0, R5; // x + (y + 1) * 200
-LOAD R13, R6; // Save pixel in R13
-OR R15, R13, R14; // OR R14 and R13, save to R15
-JEQ R15, R3, 39; // Jump to erosion
-MULI R5, R1, 20; // y * 20
-ADD R6, R0, R5; // x + y * 200
-ADDI R7, R6, 400; // Offset to output image
-STORE R4, R7; // Set pixel to 255
-JMP 50; // GOTO increment y
-MULI R5, R1, 20; // y * 20
-ADD R6, R0, R5; // x + y * 200
-ADDI R7, R6, 400; // Offset to output image
-STORE R3, R7; // Set Pixel to zero
-JMP 50; // GOTO increment y
-MULI R5, R1, 20; // y * 20
-ADD R6, R0, R5; // x + y * 200
-ADDI R7, R6, 400; // Offset to output image
-STORE R3, R7; // Set Pixel to zero
-JMP 11; // Continue program after border process
-INC R1; // Increment y
-JMP 6; // Continue nested loop
-INC R0; // Increment x
-LOADI R1, 0; // Zerorise y
-JMP 5; // Continue main loop
-END; // Terminate program
+\begin{figure}[!h]
+    \captionof{listing}{The program compiled to assembly}\label{lst:ass}
+    \begin{minipage}{0.49\textwidth}
+        \vspace{1.5em}
+        \centering
+        \begin{minted}[firstnumber = 0]{mips}
+        # Initial values
+LOADI R0, 0;      # x counter
+LOADI R1, 0;      # y counter
+LOADI R2, 19;     # Pixel limit
+LOADI R3, 0;      # Zero value
+LOADI R4, 255;    # 255 value
+        # For loop conditions
+JEQ R0, R2, 58    # Check x, GOTO END
+JEQ R1, R2, 54    # Check y, GOTO INC X
+        # Output image adress
+MULT R5, R1, 20;  # y * 20
+ADD R6, R0, R5;   # x + y * 20
+ADDI R5, R6, 400; # Out image address
+        # Process border pixel
+JEQ R0, R3, 48    # If x or y = 0
+JEQ R1, R3, 48    #
+JEQ R0, R4, 48    # If x or y = 19
+JEQ R1, R4, 48    # GOTO erosion
+        # Process inner pixel
+MULT R6, R1, 20;  # y * 20
+ADD R7, R0, R6;   # x + y * 20
+LOAD R8, R7;      # Get input pixel
+JEQ R8, R3, 48;   # If 0, GOTO erosion
+        # Process outer pixels
+SUBI R12, R0, 1   # x - 1
+ADDI R13, R0, 1   # x + 1
+SUBI R14, R1, 1   # y - 1
+ADDI R15, R1, 1   # y + 1
+MULT R6, R1, 20;  # y * 20
+ADD R7, R6, R12;  # (x - 1) + y * 20
     \end{minted}
-\end{listing}
+    \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+        \vspace{.5em}
+        \centering
+        \begin{minted}[firstnumber = 30]{mips}
+LOAD R8, R7;      # Save pixel in R8
+MULT R6, R1, 20;  # y * 20
+ADD R7, R6, R13;  # (x + 1) + y * 20
+LOAD R9, R7;      # Save pixel in R9
+OR R10, R8, R9;   # OR R8 and R9, save to R10
+MULT R6, R14, 20; # (y - 1) * 20
+ADD R7, R6, R0;   # x + (y - 1) * 20
+LOAD R8, R7;      # Save pixel in R8
+OR R9, R8, R10;   # OR R8 nad R10, save to R9
+MULT R6, R15, 20; # (y + 1) * 20
+ADD R7, R6, R0;   # x + (y + 1) * 20
+LOAD R10, R7;     # Save pixel in R10
+OR R8, R9, R10;   # OR R9 and R10, save to R8
+JEQ R8, R3, 48;   # If = 0 GOTO Erosion
+            # No erosion
+STORE R4, R5;     # Set pixel to 255
+JMP 51;           # GOTO increment y
+            # Erosion
+STORE R3, R5;     # Set Pixel to zero
+JMP 51;           # GOTO increment y
+            # Increment y
+INC R1;           # Increment y
+JMP 8;            # Continue nested loop
+            # Increment x
+INC R0;           # Increment x
+LOADI R1, 0;      # Zerorise y
+JMP 7;            # Continue main loop
+            # Terminate program
+END;              # Terminate program
+     \end{minted}
+    \end{minipage}
+\end{figure}
 \begin{landscape}
     \subsection{CPU block}
     \tikzset{ALU/.style={muxdemux, muxdemux def={
