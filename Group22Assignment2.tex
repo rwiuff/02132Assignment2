@@ -317,57 +317,62 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
 \subsection{Compile and encode}
 \begin{listing}[p]
     \centering
-    \caption[short]{The program compiled to assembly}\label{lst:ass}
+    \caption{The program compiled to assembly}\label{lst:ass}
     \begin{minted}[firstnumber = 0]{mips}
 LOADI R0, 0; // Initial values; x counter
 LOADI R1, 0; // y counter
 LOADI R2, 19; // Pixel limit
 LOADI R3, 0; // Zero value
 LOADI R4, 255; // 255 value
-JEQ R0, R2, END // For conditions; Check x, GOTO program termination
-JEQ R1, R2, INCX // Check y, GOTO incrementation of x
-JEQ R0, R3, ZEROPIXEL // Process border pixel; If x = 0
-JEQ R1, R3, ZEROPIXEL // If y = 0
-JEQ R0, R4, ZEROPIXEL // If x = 255
-JEQ R1, R4, ZEROPIXEL // If y = 255
+JEQ R0, R2, 55 // For conditions; Check x, GOTO program termination
+JEQ R1, R2, 52 // Check y, GOTO incrementation of x
+JEQ R0, R3, 45 // Process border pixel; If x = 0, zerorise
+JEQ R1, R3, 45 // If y = 0, zerorise
+JEQ R0, R4, 45 // If x = 19, zerorise
+JEQ R1, R4, 45 // If y = 19, zerorise
 MULI R5, R1, 20; // y * 20
 ADD R6, R0, R5; // x + y * 200
 LOAD R8, R6; // Get input image pixel
-JEQ R8, R3, BLACK PIXEL; // Check if 0, GOTO pixel zerorising
+JEQ R8, R3, 40; // Check if 0, GOTO pixel zerorising
 SUBI R9, R0, 1 // x - 1
 ADDI R10, R0, 1 // x + 1
 SUBI R11, R1, 1 // y - 1
 ADDI R12, R1, 1 // y + 1
 MULI R5, R1, 20; // y * 20
 ADD R6, R9, R5; // (x - 1) + y * 200
-
+LOAD R13, R6; // Save pixel in R13
 MULI R5, R1, 20; // y * 20
 ADD R6, R10, R5; // (x + 1) + y * 200
-
+LOAD R14, R6; // Save pixel in R14
+OR R15, R13, R14; // OR R13 and R14, save to R15
 MULI R5, R11, 20; // (y - 1) * 20
 ADD R6, R0, R5; // x + (y - 1) * 200
-
+LOAD R13, R6; // Save pixel in R13
+OR R14, R13, R15; // OR R15 nad R13, save to R14
 MULI R5, R12, 20; // (y + 1) * 20
 ADD R6, R0, R5; // x + (y + 1) * 200
-
-
-
-
+LOAD R13, R6; // Save pixel in R13
+OR R15, R13, R14; // OR R14 and R13, save to R15
+JEQ R15, R3, 39; // Jump to erosion
+MULI R5, R1, 20; // y * 20
+ADD R6, R0, R5; // x + y * 200
+ADDI R7, R6, 400; // Offset to output image
+STORE R4, R7; // Set pixel to 255
+JMP 50; // GOTO increment y
 MULI R5, R1, 20; // y * 20
 ADD R6, R0, R5; // x + y * 200
 ADDI R7, R6, 400; // Offset to output image
 STORE R3, R7; // Set Pixel to zero
-JMP INCY; // Continue program after border process
-
+JMP 50; // GOTO increment y
 MULI R5, R1, 20; // y * 20
 ADD R6, R0, R5; // x + y * 200
 ADDI R7, R6, 400; // Offset to output image
 STORE R3, R7; // Set Pixel to zero
 JMP 11; // Continue program after border process
-
 INC R1; // Increment y
 JMP 6; // Continue nested loop
 INC R0; // Increment x
+LOADI R1, 0; // Zerorise y
 JMP 5; // Continue main loop
 END; // Terminate program
     \end{minted}
