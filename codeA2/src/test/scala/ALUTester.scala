@@ -46,15 +46,15 @@ class ALUTester(dut: ALU) extends PeekPokeTester(dut) {
 
 // Test for Comparisons returning true
   poke(dut.io.f, 4)
-  poke(dut.io.a, 2)
+  poke(dut.io.a, 1)
   poke(dut.io.b, 1)
   expect(dut.io.result, 1)
   step(1)
 
   // Test for Comparisons returning false
   poke(dut.io.f, 4)
-  poke(dut.io.a, 2)
-  poke(dut.io.b, 3)
+  poke(dut.io.a, 1)
+  poke(dut.io.b, 2)
   expect(dut.io.result, 0)
   step(1)
 
@@ -63,6 +63,12 @@ class ALUTester(dut: ALU) extends PeekPokeTester(dut) {
   poke(dut.io.a, 3)  // 0011
   poke(dut.io.b, 5)  // 0101
   expect(dut.io.result, 15)  // 1111
+  step(1)
+
+  // Test for INC operation
+  poke(dut.io.f, 6)
+  poke(dut.io.a, 1)
+  expect(dut.io.result, 2)
   step(1)
 }
 

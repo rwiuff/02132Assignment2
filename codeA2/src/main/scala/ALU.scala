@@ -23,8 +23,9 @@ class ALU extends Module {
     is(1.U) {result := io.a - io.b}
     is(2.U) {result := io.a | io.b}
     is(3.U) {result := io.a & io.b}
-    is(4.U) {result := io.a > io.b}
+    is(4.U) {result := io.a === io.b}
     is(5.U) {result := io.a * io.b}
+    is(6.U) {result := io.a + (1.U)}
   }
 
     //output

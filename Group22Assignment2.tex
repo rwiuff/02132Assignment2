@@ -215,7 +215,7 @@ separate-uncertainty-units = single ,
 \section{Design}
 % \emph{Explain here what the design process was. List and describe your ISA and how the instructions are encoded. List and describe your compiled program (put a reference to attached file if the compiled program is too long to fit here). Show and describe the block diagram of your CPU. Motivate the design decision you made.}
 \subsection{ISA and encoding}\label{sec:isa}
-The ISA instructions are inspired from Appendix A in the assignment description. It is listed in \cref{tbl:ISA}.
+The ISA instructions are inspired from Appendix A in the assignment description. Chosen instructions are listed in \cref{tbl:ISA}.
 \begin{table}[H]
     \centering
     \caption{Instruction-set architecture used in the assignment}\label{tbl:ISA}
@@ -230,7 +230,7 @@ The ISA instructions are inspired from Appendix A in the assignment description.
         Immediate addition       & \texttt{ADDI Rx, Ry, z;} & \texttt{Rx = Ry + z}             \\
         Immediate subtraction    & \texttt{SUBI Rx, Ry, z;} & \texttt{Rx = Ry - z}             \\
         Immediate multiplication & \texttt{MULT Rx, Ry, z;} & \texttt{Rx = Ry \(\cdot\) z}     \\
-        % Increment                & \texttt{INC, Rx}         & \texttt{Rx = Rx + 1}              \\
+        Increment                & \texttt{INC, Rx}         & \texttt{Rx = Rx + 1}             \\
         \midrule
         \multicolumn{3}{c}{Logic instructions}                                                 \\
         \midrule
@@ -243,16 +243,15 @@ The ISA instructions are inspired from Appendix A in the assignment description.
         Load immediate           & \texttt{LOADI Rx, y;}    & \texttt{Rx = y}                  \\
         Load data                & \texttt{LOAD Rx, Ry;}    & \texttt{Rx = memory(Ry)}         \\
         Store data               & \texttt{STORE Rx, Ry;}   & \texttt{memory(Ry) = Rx}         \\
-        Move data                & \texttt{MOVE Rx, Ry;}    & \texttt{Rx = Ry}                 \\
+        % Move data                & \texttt{MOVE Rx, Ry;}    & \texttt{Rx = Ry}                 \\
         \midrule
         \multicolumn{3}{c}{Control and flow instructions}                                      \\
         \midrule
         Jump                     & \texttt{JMP x}           & \texttt{GOTO INST x}             \\
-        Jump if equal            & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z} \\
+        Jump if equal            & \texttt{JEQ Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z} \\
         % Jump if less than        & \texttt{JLT Rx, Ry, z;}  & \texttt{if(Rx < Ry) GOTO INST z}  \\
         % Jump if greater than     & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z}  \\
         % Jump if zero             & \texttt{JZ Rx, y;}       & \texttt{if(Rx == 0) GOTO INST y}  \\
-        Do nothing               & \texttt{NOP;}            & \texttt{No operation}            \\
         END                      & \texttt{END;}            & \texttt{Terminate}               \\
         \bottomrule
     \end{tabular}
@@ -288,100 +287,159 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
 \begin{table}[H]
     \centering
     \caption{OPCODE instruction bits.}\label{tbl:opcode}
-    \begin{tabular}{ll}
+    \begin{tabular}{lllll}
         \toprule
-        OPCODE bits & Instruction    \\
+        OPCODE bits & Instruction   &  & OPCODE bits & Instruction    \\
         \midrule
-        0001        & \texttt{ADD}   \\
-        0010        & \texttt{SUB}   \\
-        0011        & \texttt{ADDI}  \\
-        0100        & \texttt{SUBI}  \\
-        0101        & \texttt{MULT}  \\
-        0110        & \texttt{OR}    \\
-        0111        & \texttt{AND}   \\
-        1000        & \texttt{LOADI} \\
-        1001        & \texttt{LOAD}  \\
-        1010        & \texttt{STORE} \\
-        1011        & \texttt{MOVE}  \\
-        1100        & \texttt{JMP}   \\
-        1101        & \texttt{JGT}   \\
-        0000        & \texttt{NOP}   \\
-        1111        & \texttt{END}   \\
+        0001        & \texttt{ADD}  &  & 1000        & \texttt{LOADI} \\
+        0010        & \texttt{SUB}  &  & 1001        & \texttt{LOAD}  \\
+        0011        & \texttt{ADDI} &  & 1010        & \texttt{STORE} \\
+        0100        & \texttt{SUBI} &  & 1011        & \texttt{INC}   \\
+        0101        & \texttt{MULT} &  & 1100        & \texttt{JMP}   \\
+        0110        & \texttt{OR}   &  & 1101        & \texttt{JEQ}   \\
+        0111        & \texttt{AND}  &  & 1111        & \texttt{END}   \\
         \bottomrule
     \end{tabular}
 \end{table}
 \subsection{Compile and encode}
-\begin{figure}[!h]
+\subsubsection{Compiled to assember}
+\cref{lst:ass} shows the erosion algorithm compiled to assebler using the ISA provided in \cref{tbl:ISA}.
+\begin{figure}
     \captionof{listing}{The program compiled to assembly}\label{lst:ass}
     \begin{minipage}{0.49\textwidth}
         \vspace{1.5em}
         \centering
-        \begin{minted}[firstnumber = 0]{mips}
+        \begin{minted}[linenos = false]{mips}
         # Initial values
-LOADI R0, 0;      # x counter
-LOADI R1, 0;      # y counter
-LOADI R2, 19;     # Pixel limit
-LOADI R3, 0;      # Zero value
-LOADI R4, 255;    # 255 value
+00. LOADI R0, 0;      # x counter
+01. LOADI R1, 0;      # y counter
+02. LOADI R2, 19;     # Pixel limit
+03. LOADI R3, 0;      # Zero value
+04. LOADI R4, 255;    # 255 value
         # For loop conditions
-JEQ R0, R2, 58    # Check x, GOTO END
-JEQ R1, R2, 54    # Check y, GOTO INC X
+05. JEQ R0, R2, 47;   # Check x, GOTO END
+06. JEQ R1, R2, 44;   # Check y, GOTO INC X
         # Output image adress
-MULT R5, R1, 20;  # y * 20
-ADD R6, R0, R5;   # x + y * 20
-ADDI R5, R6, 400; # Out image address
+07. MULT R5, R1, 20;  # y * 20
+08. ADD R6, R0, R5;   # x + y * 20
+09. ADDI R5, R6, 400; # Out image address
         # Process border pixel
-JEQ R0, R3, 48    # If x or y = 0
-JEQ R1, R3, 48    #
-JEQ R0, R4, 48    # If x or y = 19
-JEQ R1, R4, 48    # GOTO erosion
+10. JEQ R0, R3, 40;   # If x or y = 0
+11. JEQ R1, R3, 40;   #
+12. JEQ R0, R4, 40;   # If x or y = 19
+13. JEQ R1, R4, 40;   # GOTO erosion
         # Process inner pixel
-MULT R6, R1, 20;  # y * 20
-ADD R7, R0, R6;   # x + y * 20
-LOAD R8, R7;      # Get input pixel
-JEQ R8, R3, 48;   # If 0, GOTO erosion
+14. MULT R6, R1, 20;  # y * 20
+15. ADD R7, R0, R6;   # x + y * 20
+16. LOAD R8, R7;      # Get input pixel
+17. JEQ R8, R3, 40;   # If 0, GOTO erosion
         # Process outer pixels
-SUBI R12, R0, 1   # x - 1
-ADDI R13, R0, 1   # x + 1
-SUBI R14, R1, 1   # y - 1
-ADDI R15, R1, 1   # y + 1
-MULT R6, R1, 20;  # y * 20
-ADD R7, R6, R12;  # (x - 1) + y * 20
+18. SUBI R12, R0, 1;  # x - 1
+19. ADDI R13, R0, 1;  # x + 1
+20. SUBI R14, R1, 1;  # y - 1
+21. ADDI R15, R1, 1;  # y + 1
+22. MULT R6, R1, 20;  # y * 20
+23. ADD R7, R6, R12;  # (x - 1) + y * 20
     \end{minted}
     \end{minipage}
     \begin{minipage}{0.49\textwidth}
         \vspace{.5em}
         \centering
-        \begin{minted}[firstnumber = 30]{mips}
-LOAD R8, R7;      # Save pixel in R8
-MULT R6, R1, 20;  # y * 20
-ADD R7, R6, R13;  # (x + 1) + y * 20
-LOAD R9, R7;      # Save pixel in R9
-OR R10, R8, R9;   # OR R8 and R9, save to R10
-MULT R6, R14, 20; # (y - 1) * 20
-ADD R7, R6, R0;   # x + (y - 1) * 20
-LOAD R8, R7;      # Save pixel in R8
-OR R9, R8, R10;   # OR R8 nad R10, save to R9
-MULT R6, R15, 20; # (y + 1) * 20
-ADD R7, R6, R0;   # x + (y + 1) * 20
-LOAD R10, R7;     # Save pixel in R10
-OR R8, R9, R10;   # OR R9 and R10, save to R8
-JEQ R8, R3, 48;   # If = 0 GOTO Erosion
+        \begin{minted}[linenos = false]{mips}
+24. LOAD R8, R7;      # Save pixel in R8
+25. MULT R6, R1, 20;  # y * 20
+26. ADD R7, R6, R13;  # (x + 1) + y * 20
+27. LOAD R9, R7;      # Save pixel in R9
+28. OR R10, R8, R9;   # OR R8 and R9, save to R10
+29. MULT R6, R14, 20; # (y - 1) * 20
+30. ADD R7, R6, R0;   # x + (y - 1) * 20
+31. LOAD R8, R7;      # Save pixel in R8
+32. OR R9, R8, R10;   # OR R8 nad R10, save to R9
+33. MULT R6, R15, 20; # (y + 1) * 20
+34. ADD R7, R6, R0;   # x + (y + 1) * 20
+35. LOAD R10, R7;     # Save pixel in R10
+36. OR R8, R9, R10;   # OR R9 and R10, save to R8
+37. JEQ R8, R3, 40;   # If = 0 GOTO Erosion
             # No erosion
-STORE R4, R5;     # Set pixel to 255
-JMP 51;           # GOTO increment y
+38. STORE R4, R5;     # Set pixel to 255
+39. JMP 42;           # GOTO increment y
             # Erosion
-STORE R3, R5;     # Set Pixel to zero
-JMP 51;           # GOTO increment y
+40. STORE R3, R5;     # Set Pixel to zero
+41. JMP 42;           # GOTO increment y
             # Increment y
-INC R1;           # Increment y
-JMP 8;            # Continue nested loop
+42. INC R1;           # Increment y
+43. JMP 6;            # Continue nested loop
             # Increment x
-INC R0;           # Increment x
-LOADI R1, 0;      # Zerorise y
-JMP 7;            # Continue main loop
+44. INC R0;           # Increment x
+45. LOADI R1, 0;      # Zerorise y
+46. JMP 5;            # Continue main loop
             # Terminate program
-END;              # Terminate program
+47. END;              # Terminate program
+     \end{minted}
+    \end{minipage}
+\end{figure}
+\subsubsection{Encoding the program}
+The program in \cref{lst:ass} is encoding using the opcodes in \cref{tbl:opcode} and instruction scheme in \cref{fig:inst} to the machine code in \cref{lst:machine}.
+\begin{figure}
+    \captionof{listing}{The encoded program}\label{lst:machine}
+    \begin{minipage}{0.49\textwidth}
+        \vspace{1.5em}
+        \centering
+        \begin{minted}[linenos = false]{mips}
+00. 1000 0000 0000 0000 0000000000000000
+01. 1000 0001 0000 0000 0000000000000000
+02. 1000 0010 0000 0000 0000000000010011
+03. 1000 0011 0000 0000 0000000000000000
+04. 1000 0100 0000 0000 0000000011111111
+05. 1101 0000 0000 0010 0000000000101111
+06. 1101 0000 0001 0010 0000000000101100
+07. 0101 0101 0001 0000 0000000000010100
+08. 0001 0110 0000 0101 0000000000000000
+09. 0011 0101 0110 0000 0000000110010000
+10. 1101 0000 0000 0011 0000000000101000
+11. 1101 0000 0001 0011 0000000000101000
+12. 1101 0000 0000 0100 0000000000101000
+13. 1101 0000 0001 0100 0000000000101000
+14. 0101 0110 0001 0000 0000000000010100
+15. 0001 0111 0000 0110 0000000000000000
+16. 1001 1000 0000 0111 0000000000000000
+17. 1101 0000 1000 0011 0000000000101000
+18. 0100 1100 0000 0000 0000000000000001
+19. 0011 1101 0000 0000 0000000000000001
+20. 0100 1110 0001 0000 0000000000000001
+21. 0011 1111 0001 0000 0000000000000001
+22. 0101 0110 0001 0000 0000000000010100
+23. 0001 0111 0110 1100 0000000000000000
+    \end{minted}
+    \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+        \vspace{1.5em}
+        \centering
+        \begin{minted}[linenos = false]{mips}
+24. 1001 1000 0000 0111 0000000000000000
+25. 0101 0110 0001 0000 0000000000010100
+26. 0001 0111 0110 1101 0000000000000000
+27. 1001 1001 0000 0111 0000000000000000
+28. 0110 1010 1000 1001 0000000000000000
+29. 0101 0110 1110 0000 0000000000010100
+30. 0001 0111 0110 0000 0000000000000000
+31. 1001 1000 0000 0111 0000000000000000
+32. 0110 1001 1000 1010 0000000000000000
+33. 0101 0110 1111 0000 0000000000010100
+34. 0001 0111 0110 0000 0000000000000000
+35. 1001 1010 0000 0111 0000000000000000
+36. 0110 1000 1001 1010 0000000000000000
+37. 1101 0000 1000 0011 0000000000101000
+38. 1010 0000 0100 0101 0000000000000000
+39. 1100 0000 0000 0000 0000000000101010
+40. 1010 0000 0011 0101 0000000000000000
+41. 1100 0000 0000 0000 0000000000101010
+42. 1011 0001 0000 0000 0000000000000000
+43. 1100 0000 0000 0000 0000000000000110
+44. 1011 0000 0000 0000 0000000000000000
+45. 1000 0001 0000 0000 0000000000000000
+46. 1100 0000 0000 0000 0000000000000101
+47. 1111 0000 0000 0000 0000000000000000
      \end{minted}
     \end{minipage}
 \end{figure}
