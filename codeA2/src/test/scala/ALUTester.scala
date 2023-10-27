@@ -57,6 +57,13 @@ class ALUTester(dut: ALU) extends PeekPokeTester(dut) {
   poke(dut.io.b, 3)
   expect(dut.io.result, 0)
   step(1)
+
+  // Test for MULT operation
+  poke(dut.io.f, 5)
+  poke(dut.io.a, 3)  // 0011
+  poke(dut.io.b, 5)  // 0101
+  expect(dut.io.result, 15)  // 1111
+  step(1)
 }
 
 // object ALUTest extends App {

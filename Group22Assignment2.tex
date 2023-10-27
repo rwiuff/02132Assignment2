@@ -221,39 +221,39 @@ The ISA instructions are inspired from Appendix A in the assignment description.
     \caption{Instruction-set architecture used in the assignment}\label{tbl:ISA}
     \begin{tabular}{lll}
         \toprule
-        \textbf{Instruction}     & \textbf{Syntax}          & \textbf{Meaning}                  \\
+        \textbf{Instruction}     & \textbf{Syntax}          & \textbf{Meaning}                 \\
         \midrule
-        \multicolumn{3}{c}{Arithmetic instructions}                                             \\
+        \multicolumn{3}{c}{Arithmetic instructions}                                            \\
         \midrule
-        Addition                 & \texttt{ADD Rx, Ry, Rz;} & \texttt{Rx = Ry + Rz}             \\
-        Subtraction              & \texttt{SUB Rx, Ry, Rz;} & \texttt{Rx = Ry - Rz}             \\
-        Immediate addition       & \texttt{ADDI Rx, Ry, z;} & \texttt{Rx = Ry + z}              \\
-        Immediate subtraction    & \texttt{SUBI Rx, Ry, z;} & \texttt{Rx = Ry - z}              \\
-        Immediate multiplication & \texttt{MULT Rx, Ry, z;} & \texttt{Rx = Ry \(\cdot\) z}      \\
-        Increment                & \texttt{INC, Rx}         & \texttt{Rx = Rx + 1}              \\
+        Addition                 & \texttt{ADD Rx, Ry, Rz;} & \texttt{Rx = Ry + Rz}            \\
+        Subtraction              & \texttt{SUB Rx, Ry, Rz;} & \texttt{Rx = Ry - Rz}            \\
+        Immediate addition       & \texttt{ADDI Rx, Ry, z;} & \texttt{Rx = Ry + z}             \\
+        Immediate subtraction    & \texttt{SUBI Rx, Ry, z;} & \texttt{Rx = Ry - z}             \\
+        Immediate multiplication & \texttt{MULT Rx, Ry, z;} & \texttt{Rx = Ry \(\cdot\) z}     \\
+        % Increment                & \texttt{INC, Rx}         & \texttt{Rx = Rx + 1}              \\
         \midrule
-        \multicolumn{3}{c}{Logic instructions}                                                  \\
+        \multicolumn{3}{c}{Logic instructions}                                                 \\
         \midrule
-        Bitwise OR               & \texttt{OR Rx, Ry, Rz;}  & \texttt{Rx = Ry \(\vert\) Rz}     \\
-        % Bitwise AND              & \texttt{AND Rx, Ry, Rz;} & \texttt{Rx = Ry \(\&\) Rz}        \\
+        Bitwise OR               & \texttt{OR Rx, Ry, Rz;}  & \texttt{Rx = Ry \(\vert\) Rz}    \\
+        Bitwise AND              & \texttt{AND Rx, Ry, Rz;} & \texttt{Rx = Ry \(\&\) Rz}       \\
         % Bitwise NOT              & \texttt{NOT Rx, Ry;}     & \texttt{Rx = \(\sim\)Ry}          \\
         \midrule
-        \multicolumn{3}{c}{Memory instructions}                                                 \\
+        \multicolumn{3}{c}{Memory instructions}                                                \\
         \midrule
-        Load immediate           & \texttt{LOADI Rx, y;}    & \texttt{Rx = y}                   \\
-        Load data                & \texttt{LOAD Rx, Ry;}    & \texttt{Rx = memory(Ry)}          \\
-        Store data               & \texttt{STORE Rx, Ry;}   & \texttt{memory(Ry) = Rx}          \\
-        % Move data                & \texttt{MOVE Rx, Ry;}    & \texttt{Rx = Ry}                  \\
+        Load immediate           & \texttt{LOADI Rx, y;}    & \texttt{Rx = y}                  \\
+        Load data                & \texttt{LOAD Rx, Ry;}    & \texttt{Rx = memory(Ry)}         \\
+        Store data               & \texttt{STORE Rx, Ry;}   & \texttt{memory(Ry) = Rx}         \\
+        Move data                & \texttt{MOVE Rx, Ry;}    & \texttt{Rx = Ry}                 \\
         \midrule
-        \multicolumn{3}{c}{Control and flow instructions}                                       \\
+        \multicolumn{3}{c}{Control and flow instructions}                                      \\
         \midrule
-        Jump                     & \texttt{JMP x}           & \texttt{GOTO INST x}              \\
-        Jump if equal            & \texttt{JEQ Rx, Ry, z;}  & \texttt{if(Rx == Ry) GOTO INST z} \\
+        Jump                     & \texttt{JMP x}           & \texttt{GOTO INST x}             \\
+        Jump if equal            & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z} \\
         % Jump if less than        & \texttt{JLT Rx, Ry, z;}  & \texttt{if(Rx < Ry) GOTO INST z}  \\
         % Jump if greater than     & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z}  \\
         % Jump if zero             & \texttt{JZ Rx, y;}       & \texttt{if(Rx == 0) GOTO INST y}  \\
-        Do nothing               & \texttt{NOP;}            & \texttt{No operation}             \\
-        END                      & \texttt{END;}            & \texttt{Terminate}                \\
+        Do nothing               & \texttt{NOP;}            & \texttt{No operation}            \\
+        END                      & \texttt{END;}            & \texttt{Terminate}               \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -297,15 +297,14 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
         0011        & \texttt{ADDI}  \\
         0100        & \texttt{SUBI}  \\
         0101        & \texttt{MULT}  \\
-        0110        & \texttt{INC}   \\
-        0111        & \texttt{OR}    \\
+        0110        & \texttt{OR}    \\
+        0111        & \texttt{AND}   \\
         1000        & \texttt{LOADI} \\
         1001        & \texttt{LOAD}  \\
         1010        & \texttt{STORE} \\
-        1011        & \texttt{JMP}   \\
-        1100        & \texttt{JEQ}   \\
-        % 1101        & \texttt{} \\
-        % 1110        & \texttt{}   \\
+        1011        & \texttt{MOVE}  \\
+        1100        & \texttt{JMP}   \\
+        1101        & \texttt{JGT}   \\
         0000        & \texttt{NOP}   \\
         1111        & \texttt{END}   \\
         \bottomrule
