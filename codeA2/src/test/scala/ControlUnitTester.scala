@@ -1,6 +1,7 @@
 import chisel3._
 import chisel3.iotesters.PeekPokeTester
 
+
 class ControlUnitTester(dut: ControlUnit) extends PeekPokeTester(dut) {
   // Test Add
   poke(dut.io.opcode, 1.U(4.W))

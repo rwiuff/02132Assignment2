@@ -13,6 +13,8 @@ class ControlUnit extends Module {
     val immediateLoad = Output(UInt(1.W))
     val loadFromMemory = Output(UInt(1.W))
     val writeToMemory = Output(UInt(1.W))
+    val readRegister1 = Output(UInt(5.W))
+    val readRegister2 = Output(UInt(5.W))
   })
 
   // Default realisation
