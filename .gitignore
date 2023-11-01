@@ -454,12 +454,13 @@ TSWLatexianTemp*
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 
 ### VisualStudioCode ###
-*vscode/*
+.vscode/*
 # !.vscode/settings.json
 # !.vscode/tasks.json
 # !.vscode/launch.json
 # !.vscode/extensions.json
 # !.vscode/*.code-snippets
+/codeA2/vscode
 
 # Local History for Visual Studio Code
 .history/
