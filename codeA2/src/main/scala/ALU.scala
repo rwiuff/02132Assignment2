@@ -9,12 +9,14 @@ class ALU extends Module {
     val result = Output(UInt(32.W))
     //probably not needed. we will never overflow this 32 bit ALU with a 20x20 pixel picture.
     val overflow = Output(Bool())
+    val immediate = Output(UInt(4.W))
 
   })
 
   val result = Wire(UInt(32.W))
   //default value
   result := 0.U
+  io.immediate := 0.U
 
 
   //ALU functionallity Selection 
