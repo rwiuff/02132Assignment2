@@ -675,8 +675,8 @@ The program in \cref{lst:ass} is encoding using the opcodes in \cref{tbl:opcode}
                 \draw[blue] (writeMuxX.north) |- (writeMux.tpin 1);
                 \draw (-9,-9) -| (writeMux.lpin 2);
                 \draw (writeMux.rpin 1) |- (m.west);
-                \pin{writeMux.lpin 1}{left}{0}
-                \pin{writeMux.lpin 2}{right}{1}
+                \pin{writeMux.lpin 1}{left}{1}
+                \pin{writeMux.lpin 2}{right}{0}
                 \node[below] at (6.5,5.5) {result[0]};
             \end{circuitikz}
         }
