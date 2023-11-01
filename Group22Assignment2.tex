@@ -75,7 +75,7 @@ separate-uncertainty-units = single ,
 %Header footer
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\lhead{02132 Computer Systems \lb Assignment 1 \lb November \nth{5}}
+\lhead{02132 Computer Systems \lb Assignment 1 \lb November \nth{12}}
 \chead{\includegraphics[width=.05\textwidth]{DTU}}
 \rhead{\authone \ \textbf{\SIDone} \lb \authtwo \ \textbf{\SIDtwo} \lb \auththree \ \textbf{\SIDthree}}
 \cfoot{Page \thepage\, of\, \pageref*{LastPage}}
@@ -185,7 +185,7 @@ separate-uncertainty-units = single ,
 {12pc}{1.5ex plus .1ex minus .2ex}{1pc}
 
 \title{\vspace{-40mm}\Huge\scshape\color{DTUred} \titl\lb\vspace{-4mm}\rule{4cm}{0.5mm}\lb\Large{\subtitl}}
-\date{November \nth{5}}
+\date{November \nth{12}}
 \preauthor{\begin{center}
         \large \lineskip 0.5em%
         \begin{tabular}[t]{r}}
@@ -386,6 +386,7 @@ The program in \cref{lst:ass} is encoding using the opcodes in \cref{tbl:opcode}
         \vspace{1.5em}
         \centering
         \begin{minted}[linenos = false]{mips}
+    OP   Rd   R1   R2   Value/adress
 00. 1000 0000 0000 0000 0000000000000000
 01. 1000 0001 0000 0000 0000000000000000
 02. 1000 0010 0000 0000 0000000000010011
@@ -416,6 +417,7 @@ The program in \cref{lst:ass} is encoding using the opcodes in \cref{tbl:opcode}
         \vspace{1.5em}
         \centering
         \begin{minted}[linenos = false]{mips}
+    OP   Rd   R1   R2   Value/adress
 24. 1001 1000 0000 0111 0000000000000000
 25. 0101 0110 0001 0000 0000000000010100
 26. 0001 0111 0110 1101 0000000000000000
