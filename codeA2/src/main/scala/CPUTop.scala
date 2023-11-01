@@ -35,31 +35,6 @@ class CPUTop extends Module {
   ////////////////////////////////////////////
   //Continue here with your connections
   ////////////////////////////////////////////
-  // Connect control unit signals
-  controlUnit.io.opcode := programMemory.io.instructionRead(3, 0)
-  controlUnit.io.writeRegister := registerFile.io.writeEnable
-  controlUnit.io.stop := io.done
-  controlUnit.io.immediateJump := programMemory.io.testerDataRead(3, 0)
-  controlUnit.io.jump := programMemory.io.testerDataRead(7, 4) 
-  controlUnit.io.aluFunc := alu.io.f
-  controlUnit.io.immediateOperand := programMemory.io.testerDataRead(11, 8) 
-  controlUnit.io.immediateLoad := programMemory.io.testerDataRead(15, 12) 
-  controlUnit.io.loadFromMemory := programMemory.io.testerDataRead(19, 16) 
-  controlUnit.io.writeToMemory := programMemory.io.testerDataRead(23, 20) 
-  alu.io.immediate := programMemory.io.testerDataRead(15, 12)
-
-
-  // Connect ALU signals
-  alu.io.f := controlUnit.io.aluFunc
-  alu.io.a := registerFile.io.a
-  alu.io.b := registerFile.io.b
-  alu.io.immediate := programMemory.io.testerDataRead 
-
-  // Connect register file signals
-  registerFile.io.writeEnable := controlUnit.io.writeRegister
-  registerFile.io.writeData := alu.io.result
-  registerFile.io.aSel := controlUnit.io.readRegister1
-  registerFile.io.bSel := controlUnit.io.readRegister2    
 
 
   //This signals are used by the tester for loading the program to the program memory, do not touch
