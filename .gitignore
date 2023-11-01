@@ -460,7 +460,7 @@ TSWLatexianTemp*
 # !.vscode/launch.json
 # !.vscode/extensions.json
 # !.vscode/*.code-snippets
-/codeA2/vscode
+/codeA2/vscode/*
 
 # Local History for Visual Studio Code
 .history/
