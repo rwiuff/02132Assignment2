@@ -12,8 +12,8 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Load the data memory with image data
   System.out.print("\nLoading the data memory with image data... ")
   //Uncomment one of the following line depending on the image you want to load to the data memory
-  //var image = Images.blackImage
-  //var image = Images.whiteImage
+  // var image = Images.blackImage
+  // var image = Images.whiteImage
   var image = Images.cellsImage
   // var image = Images.borderCellsImage
   for( address <- 0 to image.length-1){
@@ -29,8 +29,11 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Load the program memory with instructions
   System.out.print("\nLoading the program memory with instructions... ")
   //Uncomment one of the following line depending on the program you want to load to the program memory
-  val program = Programs.test1
-  //val program = Programs.program2
+  // val program = Programs.memTest
+  // val program = Programs.arithmeticTest
+  // val program = Programs.jumpTest
+  // val program = Programs.incTest
+  val program = Programs.erosionAlgorithm
   for( address <- 0 to program.length-1){
     poke(dut.io.testerProgMemEnable, 1)
     poke(dut.io.testerProgMemWriteEnable, 1)
