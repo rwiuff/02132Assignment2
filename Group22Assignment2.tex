@@ -474,15 +474,15 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
     \tikzset{ALU/.style={muxdemux, muxdemux def={
                         Lh=7, NL=2, Rh=3, NR=1, NB=0, NT=1, w=4, inset w=1, inset Lh=1, inset Rh=0, square pins=1}}}
     \tikzset{PC/.style={muxdemux, muxdemux def={
-                        Lh = 6, Rh = 6, w = 6, NL = 4, NR = 1, NT = 0, NB = 0}}}
+                        Lh = 6, Rh = 6, w = 4, NL = 4, NR = 1, NT = 0, NB = 0}}}
     \tikzset{ROM/.style={muxdemux, muxdemux def={
-                        Lh = 6, Rh = 6, w = 6, NL = 0, NR = 2, NT = 0, NB = 0}}}
+                        Lh = 6, Rh = 6, w = 4, NL = 0, NR = 2, NT = 0, NB = 0}}}
     \tikzset{RAM/.style={muxdemux, muxdemux def={
-                        Lh = 6, Rh = 6, w = 6, NL = 3, NR = 1, NT = 0, NB = 0}}}
+                        Lh = 6, Rh = 6, w = 4, NL = 3, NR = 1, NT = 0, NB = 0}}}
     \tikzset{REG/.style={muxdemux, muxdemux def={
-                        Lh = 6, Rh = 6, w = 6, NL = 5, NR = 2, NT = 0, NB = 0}}}
+                        Lh = 6, Rh = 6, w = 4, NL = 5, NR = 2, NT = 0, NB = 0}}}
     \tikzset{CU/.style={muxdemux, muxdemux def={
-                        Lh = 6, Rh = 6, w = 6, NL = 1, NR = 5, NT = 2, NB = 2}}}
+                        Lh = 6, Rh = 6, w = 4, NL = 1, NR = 5, NT = 2, NB = 2}}}
     \tikzset{MUX/.style={muxdemux, muxdemux def={
                         Lh=5, NL=2, Rh=2, NR=1, NB=0, NT=1, w=2, inset w=0, inset Lh=0, inset Rh=0, square pins=1}}}
     \ctikzset{bipoles/crossing/size=.3}
@@ -511,7 +511,7 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                 \pin{alu.lpin 2}{below left}{operand 2}
                 \pin{alu.tpin 1}{right}{sel}
                 \pin{alu.rpin 1}{right}{result}
-                \node[ROM, left = 8 of reg.lpin 2, anchor=rpin 1, align=left] (rom) {\ttfamily Program \\ \ttfamily Memory};
+                \node[ROM, left = 9 of reg.lpin 2, anchor=rpin 1, align=left] (rom) {\ttfamily Program \\ \ttfamily Memory};
                 \pin{rom.rpin 1}{above right}{instructionRead}
                 \pin{rom.rpin 2}{right}{address}
                 \node[PC, above = 1 of rom, align=left] (pc) {\ttfamily Program \\ \ttfamily Counter};
@@ -548,7 +548,7 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                 \draw[blue] (y.south) |- (z.north);
                 \draw[blue] (z.south) |- (reg.lpin 5);
                 \coordinate (step2) at (5,0);
-                \node[MUX, right = 4 of reg.rpin 2, anchor = lpin 1] (alumux) {\ttfamily MUX};
+                \node[MUX, right = 4.3 of reg.rpin 2, anchor = lpin 1] (alumux) {\ttfamily MUX};
                 \pin{cu.rpin 4}{above right}{immediateOperand}
                 \begin{scope}
                     \ctikzset{crossing vertical/.cd, color=blue}
@@ -599,8 +599,8 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                 \pin{cu.rpin 3}{above right}{aluFunc}
                 \pin{cu.tpin 2}{left}{stop}
                 \pin{cu.rpin 2}{above right}{jump}
-                \coordinate (step4) at (-15,0);
-                \coordinate (step5) at (-17,0);
+                \coordinate (step4) at (-14.5,0);
+                \coordinate (step5) at (-16.3,0);
                 \node at (step4 |- pc.lpin 2) [jump crossing] (h) {};
                 \begin{scope}
                     \ctikzset{crossing vertical/.cd, color=black}
@@ -612,15 +612,15 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                     \node at (step5 |- pc.lpin 2) [jump crossing] (j1) {};
                 \end{scope}
                 \draw (h.east) -- (pc.lpin 2);
-                \draw[blue] (cu.tpin 2) |- (0,7.5) -| (-17,5) |- (j1.north);
+                \draw[blue] (cu.tpin 2) |- (0,7.5) -| (-16.3,5) |- (j1.north);
                 \draw[blue] (j1.south) |- (k.west);
                 \draw[blue] (k.east) -- (pc.lpin 3);
-                \port{done}{left = 4 of pc.lpin 3}{left}{done}
-                \port{run}{left = 4 of pc.lpin 4}{left}{run}
+                \port{done}{left = 3.5 of pc.lpin 3}{left}{done}
+                \port{run}{left = 3.5 of pc.lpin 4}{left}{run}
                 \draw[blue] (done) -- (j1 |- pc.lpin 3);
                 \draw (run) -- (l.west);
                 \draw (l.east) -- (pc.lpin 4);
-                \draw (pc.rpin 1) |- (-14.5,2) to[multiwire=16] (-14.5,-2.3) -| (rom.rpin 2);
+                \draw (pc.rpin 1) |- (-13.8,2) to[multiwire=16] (-13.8,-2.3) -| (rom.rpin 2);
                 \node at (-7,0) [jump crossing] (m) {};
                 \draw (rom.rpin 1 -| m) -- (m.north);
                 \begin{scope}
@@ -654,8 +654,8 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                 \draw (l.south) |- (-8.8, -3);
                 \coordinate (jumpcoord) at (-8.8,0);
                 \draw (rom.rpin 1 -| jumpcoord) -- (-8.8, -3);
-                \node[left] at (-15,0) {instruction[15..0]};
-                \node [and port, right = 3.5 of cu.rpin 1, anchor = in 2] (and) {\ttfamily AND};
+                \node[left] at (-14.5,0) {instruction[15..0]};
+                \node [and port, right = 4 of cu.rpin 1, anchor = in 2] (and) {\ttfamily AND};
                 \draw (alu.rpin 1) to[multiwire=32] (alu.rpin 1 |- cu.rpin 2) -| (and.in 2);
                 \draw[blue] (cu.rpin 2) -| (5,6) |- (and.in 1);
                 \node[MUX, right = .5 of and, anchor = lpin 2] (jmpMux) {\ttfamily MUX};
@@ -665,7 +665,7 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                 \pin{jmpMux.lpin 2}{above}{0}
                 \pin{cu.rpin 1}{above right}{immediateJump}
                 \draw[blue] (cu.rpin 1) -| (4.5,7) |- (jmpMux.tpin 1);
-                \draw (jmpMux.rpin 1) |- (0,9.5) -| (-17.5,5.5) |- (j1.west);
+                \draw (jmpMux.rpin 1) |- (0,9.5) -| (-16.8,5.5) |- (j1.west);
                 \draw (j1.east) -- (h.west);
                 \pin{cu.bpin 1}{left}{writeToMemory}
                 \draw[blue] (cu.bpin 1) |- (2,2);
@@ -679,7 +679,7 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                 \pin{ram.lpin 1}{above left}{dataWrite}
                 \pin{ram.lpin 2}{above left}{address}
                 \pin{ram.lpin 3}{above left}{writeEnable}
-                \pin{ram.rpin 1}{above right}{dataRead}
+                \pin{ram.rpin 1}{right}{dataRead}
                 \node[below] at (-3,-5.8) {b[15..0]};
                 \draw[blue] (ram1.south) |- (-4.5,-2.5) |- (ram.lpin 3);
                 \draw (ram2.south) |- (-4,-3) |- (ram.lpin 2);
