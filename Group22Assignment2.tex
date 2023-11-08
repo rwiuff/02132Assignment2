@@ -261,7 +261,7 @@ The instruction layout is laid out in \cref{fig:inst}.
 \begin{figure}[H]
     \centering
     \centering
-    \caption{Instruction layout. R1 and 2 are operands, Rd is the destination register. Remaining bits are used for either memory address or immediate value.}\label{fig:inst}
+    \caption{Instruction layout. Ra and Rb are operands, Rd is the destination register. Remaining bits are used for either memory address or immediate value.}\label{fig:inst}
     \resizebox{\textwidth}{!}{%
         \begin{tikzpicture}
             \draw[black, very thick] (0,0) rectangle (32,2); % INST box
@@ -272,8 +272,8 @@ The instruction layout is laid out in \cref{fig:inst}.
             \draw[fill=cyan!20] (16,0) rectangle (32,2); % Value section
             \node[align=center] (opcode) at (2,1) {\Large OPCODE (4 bits) \\ \Large 31\(\cdots\)28};
             \node[align=center] (rd) at (6,1) {\Large Rd (4 bits) \\ \Large 27\(\cdots\)24};
-            \node[align=center] (r1) at (10,1) {\Large R1 (4 bits) \\ \Large 23\(\cdots\)20};
-            \node[align=center] (r2) at (14,1) {\Large R2 (4 bits) \\ \Large 19\(\cdots\)16};
+            \node[align=center] (r1) at (10,1) {\Large Ra (4 bits) \\ \Large 23\(\cdots\)20};
+            \node[align=center] (r2) at (14,1) {\Large Rb (4 bits) \\ \Large 19\(\cdots\)16};
             \node[align=center] (val) at (24,1) {\Large Value/address (16 bit) \\ \Large 15\(\cdots\)0};
             % \node (zero) at (32,3) {\Large 0};
             % \node (thirtytwo) at (0,3) {\Large 31};
@@ -283,7 +283,7 @@ The instruction layout is laid out in \cref{fig:inst}.
     }%
 \end{figure}
 \subsubsection{Opcodes}
-As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA} accounts for seven register type operations, four jump types, three immediate types and two runtime operations.
+As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA} accounts for fourteen instructions, all assigned an OPCODE shown in \cref{tbl:opcode}.
 \begin{table}[H]
     \centering
     \caption{OPCODE instruction bits.}\label{tbl:opcode}
@@ -379,14 +379,38 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
     \end{minipage}
 \end{figure}
 \subsubsection{Encoding the program}
-The program in \cref{lst:ass} is encoding using the opcodes in \cref{tbl:opcode} and instruction scheme in \cref{fig:inst} to the machine code in \cref{lst:machine}.
+The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encoded using the instruction scheme in \cref{fig:inst} as illustrated in \cref{tbl:encex}. The program in \cref{lst:ass} is encoded to machine code in \cref{lst:machine}.
+\begin{table}[H]
+    \centering
+    \caption{Encoding instructions under the instruction set and encoding scheme}\label{tbl:encex}
+    \begin{tabular}{llllll}
+        \toprule
+        \textbf{Instruction}     & OPCODE        & Rd            & Ra            & Rb            & Value/adress                 \\
+        \midrule
+        \texttt{ADD R1, R2, R3;} & \texttt{0001} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{SUB R1, R2, R3;} & \texttt{0010} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{ADDI R1, R2, 1;} & \texttt{0011} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{SUBI R1, R2, 1;} & \texttt{0100} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{MULT R1, R2, 1;} & \texttt{0101} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{OR R1, R2, R3;}  & \texttt{0110} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{AND R1, R2, R3;} & \texttt{0111} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{LOADI R1, 1;}    & \texttt{1000} & \texttt{0001} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{LOAD R1, R2;}    & \texttt{1001} & \texttt{0001} & \texttt{0000} & \texttt{0010} & \texttt{0000 0000 0000 0000} \\
+        \texttt{STORE R1, R2;}   & \texttt{1010} & \texttt{0000} & \texttt{0001} & \texttt{0010} & \texttt{0000 0000 0000 0000} \\
+        \texttt{INC R1;}         & \texttt{1011} & \texttt{0001} & \texttt{0001} & \texttt{0000} & \texttt{0000 0000 0000 0000} \\
+        \texttt{JMP 1;}          & \texttt{1100} & \texttt{0000} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{JEQ R1, R2, 1;}  & \texttt{1101} & \texttt{0000} & \texttt{0001} & \texttt{0010} & \texttt{0000 0000 0000 0001} \\
+        \texttt{END;}            & \texttt{1111} & \texttt{0000} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0000} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 \begin{figure}
     \captionof{listing}{The encoded program}\label{lst:machine}
     \begin{minipage}{0.49\textwidth}
         \vspace{1.5em}
         \centering
         \begin{minted}[linenos = false]{mips}
-    OP   Rd   R1   R2   Value/adress
+    OP   Rd   Ra   Rb   Value/adress
 00. 1000 0000 0000 0000 0000000000000000
 01. 1000 0001 0000 0000 0000000000000000
 02. 1000 0010 0000 0000 0000000000010011
@@ -417,7 +441,7 @@ The program in \cref{lst:ass} is encoding using the opcodes in \cref{tbl:opcode}
         \vspace{1.5em}
         \centering
         \begin{minted}[linenos = false]{mips}
-    OP   Rd   R1   R2   Value/adress
+    OP   Rd   Ra   Rb   Value/adress
 24. 1001 1000 0000 0111 0000000000000000
 25. 0101 0110 0001 0000 0000000000010100
 26. 0001 0111 0110 1101 0000000000000000
