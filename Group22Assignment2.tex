@@ -215,11 +215,18 @@ separate-uncertainty-units = single ,
 \end{table}
 \section{Design}
 % \emph{Explain here what the design process was. List and describe your ISA and how the instructions are encoded. List and describe your compiled program (put a reference to attached file if the compiled program is too long to fit here). Show and describe the block diagram of your CPU. Motivate the design decision you made.}
-\subsection{ISA and encoding}\label{sec:isa}
-The ISA instructions are inspired from Appendix A in the assignment description. Chosen instructions are listed in \cref{tbl:ISA}.
-\begin{table}[H]
+The project requirements were open to broad interpretation, so first step of the design was to put on restrictions. The following was stipulated:
+\begin{enumerate}
+    \item All blocks in the assignment would be laid out as described in the material.
+    \item The architecture would be 32-bit
+    \item The instruction set architecture should be as simple as possible, but still versatile.
+\end{enumerate}
+The next step was designing the instruction set architecture and the encoding scheme.
+\subsection{ISA and encoding scheme}\label{sec:isa}
+The instruction set needs to contain basic arithmetic operations as well as logical ones for computations. Instructions are also needed for creating variables in the registers as well as reading and writing data between registers and memory. A branch (or in this report jump) instruction is needed to navigate instructions and at least one conditional branch instruction. Lastly the program needs to terminate. The chosen instructions are listed in \cref{tbl:ISA}.
+\begin{table}
     \centering
-    \caption{Instruction-set architecture used in the assignment}\label{tbl:ISA}
+    \caption{Instruction set architecture used in the assignment}\label{tbl:ISA}
     \begin{tabular}{lll}
         \toprule
         \textbf{Instruction}     & \textbf{Syntax}          & \textbf{Meaning}                 \\
@@ -252,9 +259,8 @@ The ISA instructions are inspired from Appendix A in the assignment description.
         \bottomrule
     \end{tabular}
 \end{table}
-To design the instructions, first the bit sizes are considered. Some are given in the assignment. If there are 16 registers, these can be reached with \(\log_2{16} = 4\) bits. Values for the logic and arithmetic operations are 16 bit as well as addresses in the memory. The opcodes fit within 4 bits.\newline
-The instruction layout is laid out in \cref{fig:inst}.
-\begin{figure}[H]
+A total of 14 instructions are settled upon. This requires \(\lceil \log_2{14} \rceil = 4\) bits for the opcode part of the instruction. As defined in the assignment, the memory block has an input of 16 bits. This, with the 4 opcode bits, leaves 12 bits for register addresses. Consequently this limits the chip to 16 registers. The instruction scheme is shown in \cref{fig:inst}.
+\begin{figure}
     \centering
     \centering
     \caption{Instruction layout. Ra and Rb are operands, Rd is the destination register. Remaining bits are used for either memory address or immediate value.}\label{fig:inst}
@@ -274,29 +280,35 @@ The instruction layout is laid out in \cref{fig:inst}.
         \end{tikzpicture}
     }%
 \end{figure}
-\subsubsection{Opcodes}
-As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA} accounts for fourteen instructions, all assigned an OPCODE shown in \cref{tbl:opcode}.
-\begin{table}[H]
+\cref{tbl:encex} shows how each instruction can be encoded into 32 bits. Notice how, when writing or reading to/from memory, \texttt{Rb} points to the register with the memory address.
+\begin{table}
     \centering
-    \caption{OPCODE instruction bits.}\label{tbl:opcode}
-    \begin{tabular}{lllll}
+    \caption{Encoding instructions under the instruction set and encoding scheme}\label{tbl:encex}
+    \begin{tabular}{llllll}
         \toprule
-        OPCODE bits & Instruction   &  & OPCODE bits & Instruction    \\
+        \textbf{Instruction}     & OPCODE        & Rd            & Ra            & Rb            & Value/address                 \\
         \midrule
-        0001        & \texttt{ADD}  &  & 1000        & \texttt{LOADI} \\
-        0010        & \texttt{SUB}  &  & 1001        & \texttt{LOAD}  \\
-        0011        & \texttt{ADDI} &  & 1010        & \texttt{STORE} \\
-        0100        & \texttt{SUBI} &  & 1011        & \texttt{INC}   \\
-        0101        & \texttt{MULT} &  & 1100        & \texttt{JMP}   \\
-        0110        & \texttt{OR}   &  & 1101        & \texttt{JEQ}   \\
-        0111        & \texttt{AND}  &  & 1111        & \texttt{END}   \\
+        \texttt{ADD R1, R2, R3;} & \texttt{0001} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{SUB R1, R2, R3;} & \texttt{0010} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{ADDI R1, R2, 1;} & \texttt{0011} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{SUBI R1, R2, 1;} & \texttt{0100} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{MULT R1, R2, 1;} & \texttt{0101} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{OR R1, R2, R3;}  & \texttt{0110} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{AND R1, R2, R3;} & \texttt{0111} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
+        \texttt{LOADI R1, 1;}    & \texttt{1000} & \texttt{0001} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{LOAD R1, R2;}    & \texttt{1001} & \texttt{0001} & \texttt{0000} & \texttt{0010} & \texttt{0000 0000 0000 0000} \\
+        \texttt{STORE R1, R2;}   & \texttt{1010} & \texttt{0000} & \texttt{0001} & \texttt{0010} & \texttt{0000 0000 0000 0000} \\
+        \texttt{INC R1;}         & \texttt{1011} & \texttt{0001} & \texttt{0001} & \texttt{0000} & \texttt{0000 0000 0000 0000} \\
+        \texttt{JMP 1;}          & \texttt{1100} & \texttt{0000} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
+        \texttt{JEQ R1, R2, 1;}  & \texttt{1101} & \texttt{0000} & \texttt{0001} & \texttt{0010} & \texttt{0000 0000 0000 0001} \\
+        \texttt{END;}            & \texttt{1111} & \texttt{0000} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0000} \\
         \bottomrule
     \end{tabular}
 \end{table}
 \subsection{Compile and encode}\label{sec:compileandencode}
 \subsubsection{Compiled to assembler}
-\cref{lst:ass} shows the erosion algorithm compiled to assembler using the ISA provided in \cref{tbl:ISA}.
-\begin{figure}
+In this project the provided algorithm is used. It is compiled by hand to assembler using the defined instruction set in \cref{tbl:ISA}. The registers are utilised in the following way. R0 and R1 contains the current \(x\) and \(y\) counter. R2 contains the picture width in pixels. R3 and R4 hold the values 0 and 255 for conditional comparison and for writing either black or white pixels to the output image addresses. R5 holds the output image address for the current pixel. The rest of the registers are used for storage during calculations.
+\begin{figure}[p]
     \captionof{listing}{The program compiled to assembly}\label{lst:ass}
     \begin{minipage}{0.49\textwidth}
         \vspace{1.5em}
@@ -311,7 +323,7 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
         # For loop conditions
 05. JEQ R0, R2, 47;   # Check x, GOTO END
 06. JEQ R1, R2, 44;   # Check y, GOTO INC X
-        # Output image adress
+        # Output image address
 07. MULT R5, R1, 20;  # y * 20
 08. ADD R6, R0, R5;   # x + y * 20
 09. ADDI R5, R6, 400; # Out image address
@@ -371,38 +383,14 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
     \end{minipage}
 \end{figure}
 \subsubsection{Encoding the program}
-The instruction set in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encoded using the instruction scheme in \cref{fig:inst} as illustrated in \cref{tbl:encex}. The program in \cref{lst:ass} is encoded to machine code in \cref{lst:machine}.
-\begin{table}[H]
-    \centering
-    \caption{Encoding instructions under the instruction set and encoding scheme}\label{tbl:encex}
-    \begin{tabular}{llllll}
-        \toprule
-        \textbf{Instruction}     & OPCODE        & Rd            & Ra            & Rb            & Value/address                 \\
-        \midrule
-        \texttt{ADD R1, R2, R3;} & \texttt{0001} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
-        \texttt{SUB R1, R2, R3;} & \texttt{0010} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
-        \texttt{ADDI R1, R2, 1;} & \texttt{0011} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
-        \texttt{SUBI R1, R2, 1;} & \texttt{0100} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
-        \texttt{MULT R1, R2, 1;} & \texttt{0101} & \texttt{0001} & \texttt{0010} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
-        \texttt{OR R1, R2, R3;}  & \texttt{0110} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
-        \texttt{AND R1, R2, R3;} & \texttt{0111} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
-        \texttt{LOADI R1, 1;}    & \texttt{1000} & \texttt{0001} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
-        \texttt{LOAD R1, R2;}    & \texttt{1001} & \texttt{0001} & \texttt{0000} & \texttt{0010} & \texttt{0000 0000 0000 0000} \\
-        \texttt{STORE R1, R2;}   & \texttt{1010} & \texttt{0000} & \texttt{0001} & \texttt{0010} & \texttt{0000 0000 0000 0000} \\
-        \texttt{INC R1;}         & \texttt{1011} & \texttt{0001} & \texttt{0001} & \texttt{0000} & \texttt{0000 0000 0000 0000} \\
-        \texttt{JMP 1;}          & \texttt{1100} & \texttt{0000} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0001} \\
-        \texttt{JEQ R1, R2, 1;}  & \texttt{1101} & \texttt{0000} & \texttt{0001} & \texttt{0010} & \texttt{0000 0000 0000 0001} \\
-        \texttt{END;}            & \texttt{1111} & \texttt{0000} & \texttt{0000} & \texttt{0000} & \texttt{0000 0000 0000 0000} \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-\begin{figure}
+\cref{lst:ass} is encoded to machine instructions using the instruction scheme in \cref{tbl:encex}. \cref{lst:machine} shows the encoded program.
+\begin{figure}[p]
     \captionof{listing}{The encoded program}\label{lst:machine}
     \begin{minipage}{0.49\textwidth}
         \vspace{1.5em}
         \centering
         \begin{minted}[linenos = false]{mips}
-    OP   Rd   Ra   Rb   Value/adress
+    OP   Rd   Ra   Rb   Value/address
 00. 1000 0000 0000 0000 0000000000000000
 01. 1000 0001 0000 0000 0000000000000000
 02. 1000 0010 0000 0000 0000000000010011
@@ -433,7 +421,7 @@ The instruction set in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encod
         \vspace{1.5em}
         \centering
         \begin{minted}[linenos = false]{mips}
-    OP   Rd   Ra   Rb   Value/adress
+    OP   Rd   Ra   Rb   Value/address
 24. 1001 1000 0000 0111 0000000000000000
 25. 0101 0110 0001 0000 0000000000010100
 26. 0001 0111 0110 1101 0000000000000000
@@ -461,8 +449,9 @@ The instruction set in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encod
      \end{minted}
     \end{minipage}
 \end{figure}
+\subsection{CPU block}\label{sec:CPU}
+The CPU block is shown in \cref{fig:cpu}.
 \begin{landscape}
-    \subsection{CPU block}\label{sec:CPU}
     \tikzset{ALU/.style={muxdemux, muxdemux def={
                         Lh=7, NL=2, Rh=3, NR=1, NB=0, NT=1, w=4, inset w=1, inset Lh=1, inset Rh=0, square pins=1}}}
     \tikzset{PC/.style={muxdemux, muxdemux def={
