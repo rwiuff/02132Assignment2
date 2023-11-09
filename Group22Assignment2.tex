@@ -198,17 +198,18 @@ separate-uncertainty-units = single ,
 \thispagestyle{empty}
 
 \section{Work distribution}
-\cref{tbl:ansvar} shows the work distribution in the group for this project.
+\cref{tbl:ansvar} shows the work distribution for this project.
 \begin{table}[H]
     \centering
     \caption{Work distribution on the project}\label{tbl:ansvar}
     \begin{tabular}{lll}
         \toprule
-        Name                 & Development tasks & Report tasks   \\
+        Name                 & Development tasks                                         & Report tasks                                \\
         \midrule
-        Mikkel Arn Andersen  &                   &                \\
-        Niclas Juul Schæffer &                   &                \\
-        Rasmus Wiuff         & ISA               & \cref{sec:isa} \\
+        Mikkel Arn Andersen  &                                                           &                                             \\
+        Niclas Juul Schæffer &                                                           &                                             \\
+        Rasmus Wiuff         & ISA, assembler compilation, machine instruction encoding, & \cref{sec:isa,sec:compileandencode,sec:CPU} \\
+                             & CPU Block design, Program Counter implementation          &                                             \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -236,22 +237,17 @@ The ISA instructions are inspired from Appendix A in the assignment description.
         \midrule
         Bitwise OR               & \texttt{OR Rx, Ry, Rz;}  & \texttt{Rx = Ry \(\vert\) Rz}    \\
         Bitwise AND              & \texttt{AND Rx, Ry, Rz;} & \texttt{Rx = Ry \(\&\) Rz}       \\
-        % Bitwise NOT              & \texttt{NOT Rx, Ry;}     & \texttt{Rx = \(\sim\)Ry}          \\
         \midrule
         \multicolumn{3}{c}{Memory instructions}                                                \\
         \midrule
         Load immediate           & \texttt{LOADI Rx, y;}    & \texttt{Rx = y}                  \\
         Load data                & \texttt{LOAD Rx, Ry;}    & \texttt{Rx = memory(Ry)}         \\
         Store data               & \texttt{STORE Rx, Ry;}   & \texttt{memory(Ry) = Rx}         \\
-        % Move data                & \texttt{MOVE Rx, Ry;}    & \texttt{Rx = Ry}                 \\
         \midrule
         \multicolumn{3}{c}{Control and flow instructions}                                      \\
         \midrule
         Jump                     & \texttt{JMP x}           & \texttt{GOTO INST x}             \\
         Jump if equal            & \texttt{JEQ Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z} \\
-        % Jump if less than        & \texttt{JLT Rx, Ry, z;}  & \texttt{if(Rx < Ry) GOTO INST z}  \\
-        % Jump if greater than     & \texttt{JGT Rx, Ry, z;}  & \texttt{if(Rx > Ry) GOTO INST z}  \\
-        % Jump if zero             & \texttt{JZ Rx, y;}       & \texttt{if(Rx == 0) GOTO INST y}  \\
         END                      & \texttt{END;}            & \texttt{Terminate}               \\
         \bottomrule
     \end{tabular}
@@ -275,10 +271,6 @@ The instruction layout is laid out in \cref{fig:inst}.
             \node[align=center] (r1) at (10,1) {\Large Ra (4 bits) \\ \Large 23\(\cdots\)20};
             \node[align=center] (r2) at (14,1) {\Large Rb (4 bits) \\ \Large 19\(\cdots\)16};
             \node[align=center] (val) at (24,1) {\Large Value/address (16 bit) \\ \Large 15\(\cdots\)0};
-            % \node (zero) at (32,3) {\Large 0};
-            % \node (thirtytwo) at (0,3) {\Large 31};
-            % \draw[->, very thick] (zero) -- (32,2);
-            % \draw[->, very thick] (thirtytwo) -- (0,2);
         \end{tikzpicture}
     }%
 \end{figure}
@@ -301,9 +293,9 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
         \bottomrule
     \end{tabular}
 \end{table}
-\subsection{Compile and encode}
-\subsubsection{Compiled to assember}
-\cref{lst:ass} shows the erosion algorithm compiled to assebler using the ISA provided in \cref{tbl:ISA}.
+\subsection{Compile and encode}\label{sec:compileandencode}
+\subsubsection{Compiled to assembler}
+\cref{lst:ass} shows the erosion algorithm compiled to assembler using the ISA provided in \cref{tbl:ISA}.
 \begin{figure}
     \captionof{listing}{The program compiled to assembly}\label{lst:ass}
     \begin{minipage}{0.49\textwidth}
@@ -379,13 +371,13 @@ As seen in \cref{fig:inst} there are 4 bits allocated to opcodes. \cref{tbl:ISA}
     \end{minipage}
 \end{figure}
 \subsubsection{Encoding the program}
-The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encoded using the instruction scheme in \cref{fig:inst} as illustrated in \cref{tbl:encex}. The program in \cref{lst:ass} is encoded to machine code in \cref{lst:machine}.
+The instruction set in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encoded using the instruction scheme in \cref{fig:inst} as illustrated in \cref{tbl:encex}. The program in \cref{lst:ass} is encoded to machine code in \cref{lst:machine}.
 \begin{table}[H]
     \centering
     \caption{Encoding instructions under the instruction set and encoding scheme}\label{tbl:encex}
     \begin{tabular}{llllll}
         \toprule
-        \textbf{Instruction}     & OPCODE        & Rd            & Ra            & Rb            & Value/adress                 \\
+        \textbf{Instruction}     & OPCODE        & Rd            & Ra            & Rb            & Value/address                 \\
         \midrule
         \texttt{ADD R1, R2, R3;} & \texttt{0001} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
         \texttt{SUB R1, R2, R3;} & \texttt{0010} & \texttt{0001} & \texttt{0010} & \texttt{0011} & \texttt{0000 0000 0000 0000} \\
@@ -470,7 +462,7 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
     \end{minipage}
 \end{figure}
 \begin{landscape}
-    \subsection{CPU block}
+    \subsection{CPU block}\label{sec:CPU}
     \tikzset{ALU/.style={muxdemux, muxdemux def={
                         Lh=7, NL=2, Rh=3, NR=1, NB=0, NT=1, w=4, inset w=1, inset Lh=1, inset Rh=0, square pins=1}}}
     \tikzset{PC/.style={muxdemux, muxdemux def={
@@ -504,7 +496,7 @@ The instructionset in \cref{tbl:ISA} with opcodes in \cref{tbl:opcode} is encode
                 \pin{reg.lpin 5}{above left}{writeEnable}
                 \pin{reg.rpin 1}{above right}{a}
                 \pin{reg.rpin 2}{above right}{b}
-                \node[CU, above = 1.5 of reg, align=left] (cu) {\ttfamily Controll \\ \ttfamily Unit};
+                \node[CU, above = 1.5 of reg, align=left] (cu) {\ttfamily Control \\ \ttfamily Unit};
                 \pin{cu.lpin 1}{above left}{opcode}
                 \node[ALU, right = 8 of reg] (alu) {\ttfamily ALU};
                 \pin{alu.lpin 1}{left}{operand 1}
