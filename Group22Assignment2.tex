@@ -689,8 +689,29 @@ The CPU block is shown in \cref{fig:cpu}.
 \end{landscape}
 \section{Implementation}
 \emph{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question “What does a reader need to know about your Chisel implementation?”}
+
+in our chisel code we have designed different components to work together to create and operate as a CPU.
+We have The ALU that makes the calculations. The way we structured is that, it has 3 inputs and 1 output. 1 input is for the function and 2 input it's for the values, then we have an output that are for the result of the calculation. and i used a switch to determent what function is selected, and we have written some tests that test different scenarios about this and even check for overflowing even tho, we will not overflow this 32 bit system. 
+Then we have our register where we create an array that save it 
+
+our register we constructed makes it possible to write and read data, and save it to a register if we wanted to. so it has 5 inputs, 2 values, 1 its need to be written, 1 where it need to be written, and 1 is the specific data that need to be written. 
+
+
+
+
+
+
 \section{Test and analysis}
 \emph{Report here the results from the test you have carried out. Present the test you have developed (if any). Remember to discuss the results and the test you have carried out, do not just present them, but explain and argue their meaning. Address the design evaluation questions listed in Task 11 in the Assignment 2 document.}
+
+
+
+
+
+
+
+
+
 % \section{References}
 \begin{thebibliography}{1}
     \bibitem{arduino}
