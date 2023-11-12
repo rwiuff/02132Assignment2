@@ -206,10 +206,16 @@ separate-uncertainty-units = single ,
         \toprule
         Name                 & Development tasks                                         & Report tasks                                \\
         \midrule
-        Mikkel Arn Andersen  &                                                           &                                             \\
-        Niclas Juul Schæffer &                                                           &                                             \\
+        Mikkel Arn Andersen  & Assembler: Memory test, arithmetic test, jump test.       & \cref{sec:test}                             \\
+                             & Implementation evaluation.                                &                                             \\
+        \midrule
+        Niclas Juul Schæffer & CPU Block design, ALU implementation,                     & \cref{sec:implement}                        \\
+                             & CPUTop implementation, Register File implementation,      &                                             \\
+                             & Chisel testers.                                           &                                             \\
+        \midrule
         Rasmus Wiuff         & ISA, assembler compilation, machine instruction encoding, & \cref{sec:isa,sec:compileandencode,sec:CPU} \\
-                             & CPU Block design, Program Counter implementation          &                                             \\
+                             & CPU Block design, Program Counter implementation,         &                                             \\
+                             & Control Unit implementation.                              &                                             \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -217,12 +223,12 @@ separate-uncertainty-units = single ,
 The project requirements were open to broad interpretation, so first step of the design was to put on restrictions. The following was stipulated:
 \begin{enumerate}
     \item All blocks in the assignment would be laid out as described in the material.
-    \item The architecture would be 32-bit
+    \item The architecture would be 32-bit.
     \item The instruction set architecture should be as simple as possible, but still versatile.
 \end{enumerate}
 The next step was designing the instruction set architecture and the encoding scheme.
 \subsection{ISA and encoding scheme}\label{sec:isa}
-The instruction set needs to contain basic arithmetic operations as well as logical ones for computations. Instructions are also needed for creating variables in the registers as well as reading and writing data between registers and memory. A branch (or in this report jump) instruction is needed to navigate instructions and at least one conditional branch instruction. Lastly the program needs to terminate. The chosen instructions are listed in \cref{tbl:ISA}.
+The instruction set needs to contain basic arithmetic operations as well as logical ones for computations. Instructions are also needed for creating variables in the registers as well as reading and writing data between registers and memory. A branch (or in this project jump) instruction is needed to navigate between instruction lines as well as at least one conditional branch instruction. Lastly the program needs to terminate. The chosen instructions are listed in \cref{tbl:ISA}.
 \begin{table}
     \centering
     \caption{Instruction set architecture used in the assignment}\label{tbl:ISA}
@@ -258,7 +264,7 @@ The instruction set needs to contain basic arithmetic operations as well as logi
         \bottomrule
     \end{tabular}
 \end{table}
-A total of 14 instructions are settled upon. This requires \(\lceil \log_2{14} \rceil = 4\) bits for the opcode part of the instruction. As defined in the assignment, the memory block has an input of 16 bits. This, with the 4 opcode bits, leaves 12 bits for register addresses. Consequently this limits the chip to 16 registers. The instruction scheme is shown in \cref{fig:inst}.
+A total of 14 instructions are settled upon. This requires \(\lceil \log_2{14} \rceil = 4\) bits for the opcode part of the instruction. As defined in the assignment, the memory block has an input of 16 bits. This, with the 4 opcode bits, leaves 12 bits for register addresses. Consequently, this limits the chip to 16 registers. The instruction scheme is shown in \cref{fig:inst}.
 \begin{figure}
     \centering
     \centering
@@ -271,11 +277,11 @@ A total of 14 instructions are settled upon. This requires \(\lceil \log_2{14} \
             \draw[fill=blue!20] (8,0) rectangle (12,2); % Reg section
             \draw[fill=yellow!20] (12,0) rectangle (16,2); % Reg section
             \draw[fill=cyan!20] (16,0) rectangle (32,2); % Value section
-            \node[align=center] (opcode) at (2,1) {\Large OPCODE (4 bits) \\ \Large 31\(\cdots\)28};
-            \node[align=center] (rd) at (6,1) {\Large Rd (4 bits) \\ \Large 27\(\cdots\)24};
-            \node[align=center] (r1) at (10,1) {\Large Ra (4 bits) \\ \Large 23\(\cdots\)20};
-            \node[align=center] (r2) at (14,1) {\Large Rb (4 bits) \\ \Large 19\(\cdots\)16};
-            \node[align=center] (val) at (24,1) {\Large Value/address (16 bit) \\ \Large 15\(\cdots\)0};
+            \node[align=center] (opcode) at (2,1) {\Large OPCODE (4 bits) \\ \Large 31 \(\cdots\) 28};
+            \node[align=center] (rd) at (6,1) {\Large Rd (4 bits) \\ \Large 27 \(\cdots\) 24};
+            \node[align=center] (r1) at (10,1) {\Large Ra (4 bits) \\ \Large 23 \(\cdots\) 20};
+            \node[align=center] (r2) at (14,1) {\Large Rb (4 bits) \\ \Large 19 \(\cdots\) 16};
+            \node[align=center] (val) at (24,1) {\Large Value/address (16 bit) \\ \Large 15 \(\cdots\) 0};
         \end{tikzpicture}
     }%
 \end{figure}
@@ -470,11 +476,11 @@ The registers are utilised in the following way:
     \end{minipage}
 \end{figure}
 \subsection{CPU block}\label{sec:CPU}
-The CPU block is shown in \cref{fig:cpu}. Blue wires are control bits from the \texttt{ControlUnit}. Alond with \cref{fig:cpu} this section will explain the connectivity from \texttt{ProgramCounter}(\texttt{PC}) to \texttt{RegisterFile} and \texttt{ControlUnit}. With these anchorpoints the rest is laid out.
+The CPU block is shown in \cref{fig:cpu}. Blue wires are control bits from the \texttt{ControlUnit}. Along with \cref{fig:cpu} this section will explain the connectivity from \texttt{ProgramCounter}(\texttt{PC}) to \texttt{RegisterFile} and \texttt{ControlUnit}. With these anchor points the rest is laid out.
 \subsubsection{ProgramCounter and RegisterFile}
 The \texttt{run} port drives the \texttt{PC}. \texttt{PC} in turn gives a 16-bit address to the \texttt{ProgramMemory}, which in turn outputs a 32-bit instruction. The instruction is split according to the instruction scheme. \texttt{Rd} connects to \texttt{writeSel} on the \texttt{RegisterFile}, \texttt{Ra} to \texttt{aSel} and \texttt{Rb} to \texttt{bSel}. The \texttt{Value/address} goes to the \texttt{PC} in case a jump is performed, and to a mux leading to the \texttt{ALU} in case an immediate value is used as a second operand. The \texttt{Extender} pads the 16-bit value to fit the 32-bit input in the mux. The \texttt{RegisterFile} outputs are connected to \texttt{DataMemory} with \texttt{a} to \texttt{dataWrite} and \texttt{b} to \texttt{address}.
 \subsubsection{ControlUnit}
-The last instruction piece contains \texttt{opcode} which goes into the \texttt{ControlUnit}. From here Driving bits are wired to various multiplexers and components. \texttt{writeToRegister} drives the \texttt{writeEnable} port and is on if data is to be saved in the \texttt{RegisterFile}. \texttt{writeToMemory} drives the \texttt{writeEnable} port and is on if data is to be saved in the \texttt{DataMemory}. \texttt{stop} goes to the \texttt{PC} and \texttt{done} output port and tells the system terminate. \texttt{immediateJump} and \texttt{jump} together with the first bit of the \texttt{ALU} result drives the \texttt{jump} port on the \texttt{PC} according to \cref{tbl:jmpbits}.
+The last instruction piece contains \texttt{opcode} which goes into the \texttt{ControlUnit}. From here Driving bits are wired to various multiplexers and components. \texttt{writeToRegister} drives the \texttt{writeEnable} port and is on if data is to be saved in the \texttt{RegisterFile}. \texttt{writeToMemory} drives the \texttt{writeEnable} port and is on if data is to be saved in the \texttt{DataMemory}. \texttt{stop} goes to the \texttt{PC} and \texttt{done} output port and tells the system to terminate. \texttt{immediateJump} and \texttt{jump}, together with the first bit of the \texttt{ALU} result drives the \texttt{jump} port on the \texttt{PC}, according to \cref{tbl:jmpbits}.
 \begin{table}[H]
     \centering
     \caption{ControlUnit jump bits}\label{tbl:jmpbits}
@@ -490,8 +496,8 @@ The last instruction piece contains \texttt{opcode} which goes into the \texttt{
     \end{tabular}
 \end{table}
 
-\texttt{aluFunc} tells the \texttt{ALU} which operation to be performed. \texttt{immediateOperand} connects the \texttt{operand2} input on the \texttt{ALU} with either the padded \texttt{Value/address} instruction or \texttt{b} port on the \texttt{RegisterFile}.\newline
-\texttt{immediateLoad} either connects the \texttt{ALU} \texttt{result} port or the \texttt{Value/address} instruction to the next mux, which is driven by \texttt{loadFromMemory}. Here either \texttt{result,Value/address} or \texttt{dataRead} on the \texttt{DataMemory} is connected to \texttt{writeData} in the \texttt{RegisterFile}.\newline
+\texttt{aluFunc} tells the \texttt{ALU} which operation to be performed. \texttt{immediateOperand} connects the \texttt{op2} input on the \texttt{ALU} with either the padded \texttt{Value/address} instruction or \texttt{b} port on \texttt{RegisterFile}.\newline
+\texttt{immediateLoad} either connects the \texttt{ALU} \texttt{result} port or the \texttt{Value/address} instruction to the next mux, which is driven by \texttt{loadFromMemory}. Here either \texttt{result,Value/address} or \texttt{dataRead} on \texttt{DataMemory} is connected to \texttt{writeData} on \texttt{RegisterFile}.\newline
 The opcode and corresponding control signals are shown in \cref{tbl:cu}.
 \begin{table}[H]
     \centering
@@ -751,15 +757,15 @@ The opcode and corresponding control signals are shown in \cref{tbl:cu}.
         }
     \end{figure}
 \end{landscape}
-\section{Implementation}
-\emph{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question “What does a reader need to know about your Chisel implementation?”}
-in our chisel code we have designed different components to work together to create and operate as a CPU.
-We have The ALU that makes the calculations. The way we structured is that, it has 3 inputs and 1 output. 1 input is for the function and 2 input it's for the values, then we have an output that are for the result of the calculation. and i used a switch to determent what function is selected, and we have written some tests that test different scenarios about this and even check for overflowing even tho, we will not overflow this 32 bit system.
+\section{Implementation}\label{sec:implement}
+% \emph{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question “What does a reader need to know about your Chisel implementation?”}
+In our chisel code we have designed different components to work together to create and operate as a CPU.
+We have The ALU that makes the calculations. The way we structured is that, it has 3 inputs and 1 output. 1 input is for the function and 2 input it's for the values, then we have an output that are for the result of the calculation. and I used a switch to determine what function is selected, and we have written some tests that test different scenarios about this and even check for overflowing even though, we will not overflow this 32-bit system.
 Then we have our register where we create an array that save it
-our register we constructed makes it possible to write and read data, and save it to a register if we wanted to. so it has 5 inputs, 2 values, 1 its need to be written, 1 where it need to be written, and 1 is the specific data that need to be written.
-\section{Test and analysis}
-\emph{Report here the results from the test you have carried out. Present the test you have developed (if any). Remember to discuss the results and the test you have carried out, do not just present them, but explain and argue their meaning. Address the design evaluation questions listed in Task 11 in the Assignment 2 document.}\newline
-Our erosion step has branches that allow it to execute the full process on an image with more or less cycles depending on the original image, therefore each pixel or step takes between 7 cycles and 21 cycles. From our test-runs the full 20x20 image takes about 6815 cycles, leaving the program with an average cycle requirement per pixel with all the processing of: 17.03. That means a 64MHz CPU would perform a step in 265 nanoseconds, a 500MHz in 34 nanoseconds, 1GHz in 18ns, 2GHz in 9ns. Although depending on the memory it is reading from, it might not be able to complete the step that fast, due to common RAM taking usually around 20-50ns just to read from. Since our code needs to load from ram and then calculate on the same 6 registers, while using the other registers to reference from, the program would not benefit from a very fast clock cycle, and in the end become very dependant on memory load speed for its total time required to run. Scaling this concept up, on the emulated CPU which ran at 2761Hz it completed 400 pixels in 2.9 seconds and printed it out, for a 950x950 image like in assignment 1, it is reasonable to assume that would take 87,7 minutes with the same CPU setup. Assignment 1 on the same computer took 201ms to complete the same task of loading the image (although a bit more complex due to needing to grey scale) and then erode once. Although this is an unfair comparison, due to Assignment 1 ran directly on the windows machine with an executable file compiled by GCC, which is quite competent in optimising code into assembly, easily beating our own made assembly code. Thusly it was able to load and calculate the pixels at full speed and a higher Hz than the emulated CPU was capable of.
+our register we constructed makes it possible to write and read data, and save it to a register if we wanted to. so it has 5 inputs, 2 values, 1 its need to be written, 1 where it needs to be written, and 1 is the specific data that need to be written.
+\section{Test and analysis}\label{sec:test}
+% \emph{Report here the results from the test you have carried out. Present the test you have developed (if any). Remember to discuss the results and the test you have carried out, do not just present them, but explain and argue their meaning. Address the design evaluation questions listed in Task 11 in the Assignment 2 document.}
+Our erosion step has branches that allow it to execute the full process on an image with more or less cycles depending on the original image, therefore each pixel or step takes between 7 cycles and 21 cycles. From our test-runs the full \(20 \times 20\) image takes about 6815 cycles, leaving the program with an average cycle requirement per pixel with all the processing of: 17.03. That means a 64 MHz CPU would perform a step in 265 nanoseconds, a 500 MHz in 34 ns, 1 GHz in 18 ns, 2 GHz in 9 ns. Although depending on the memory it is reading from, it might not be able to complete the step that fast, due to common RAM taking usually around 20-50ns just to read from. Since our code needs to load from ram and then calculate on the same 6 registers, while using the other registers to reference from, the program would not benefit from a very fast clock cycle, and in the end become very dependent on memory load speed for its total time required to run. Scaling this concept up, on the emulated CPU which ran at 2761Hz it completed 400 pixels in 2.9 seconds and printed it out, for a \(950 \times 950\) image like in assignment 1, it is reasonable to assume that would take 87.7 minutes with the same CPU setup. Assignment 1 on the same computer took 201 ms to complete the same task of loading the image (although a bit more complex due to needing to grey scale) and then erode once. Although this is an unfair comparison, due to Assignment 1 ran directly on the Windows machine with an executable file compiled by GCC, which is quite competent in optimising code into assembly, easily beating our own made assembly code. Thusly it was able to load and calculate the pixels at full speed and a higher Hz than the emulated CPU was capable of.
 % \section{References}
 % \begin{thebibliography}{1}
 %     \bibitem{arduino}
