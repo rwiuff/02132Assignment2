@@ -763,10 +763,23 @@ In our chisel code we have designed different components to work together to cre
 We have The ALU that makes the calculations. The way we structured is that, it has 3 inputs and 1 output. 1 input is for the function and 2 input it's for the values, then we have an output that are for the result of the calculation. and I used a switch to determine what function is selected, and we have written some tests that test different scenarios about this and even check for overflowing even though, we will not overflow this 32-bit system.
 Then we have our register where we create an array that save it
 our register we constructed makes it possible to write and read data, and save it to a register if we wanted to. so it has 5 inputs, 2 values, 1 its need to be written, 1 where it needs to be written, and 1 is the specific data that need to be written.
-in our "CPUTop" we designed the CPU itself, where we connects every single components that we constructed to communicate together. we designed what bit was reserved to what so that we knew when there was a 32 bit then what component should read each bit. 
+in our "CPUTop" we designed the CPU itself, where we connects every single components that we constructed to communicate together. we designed what bit was reserved to what so that we knew when there was a 32 bit then what component should read each bit.
 \section{Test and analysis}\label{sec:test}
 % \emph{Report here the results from the test you have carried out. Present the test you have developed (if any). Remember to discuss the results and the test you have carried out, do not just present them, but explain and argue their meaning. Address the design evaluation questions listed in Task 11 in the Assignment 2 document.}
 Our erosion step has branches that allow it to execute the full process on an image with more or less cycles depending on the original image, therefore each pixel or step takes between 7 cycles and 21 cycles. From our test-runs the full \(20 \times 20\) image takes about 6815 cycles, leaving the program with an average cycle requirement per pixel with all the processing of: 17.03. That means a 64 MHz CPU would perform a step in 265 nanoseconds, a 500 MHz in 34 ns, 1 GHz in 18 ns, 2 GHz in 9 ns. Although depending on the memory it is reading from, it might not be able to complete the step that fast, due to common RAM taking usually around 20-50ns just to read from. Since our code needs to load from ram and then calculate on the same 6 registers, while using the other registers to reference from, the program would not benefit from a very fast clock cycle, and in the end become very dependent on memory load speed for its total time required to run. Scaling this concept up, on the emulated CPU which ran at 2761Hz it completed 400 pixels in 2.9 seconds and printed it out, for a \(950 \times 950\) image like in assignment 1, it is reasonable to assume that would take 87.7 minutes with the same CPU setup. Assignment 1 on the same computer took 201 ms to complete the same task of loading the image (although a bit more complex due to needing to grey scale) and then erode once. Although this is an unfair comparison, due to Assignment 1 ran directly on the Windows machine with an executable file compiled by GCC, which is quite competent in optimising code into assembly, easily beating our own made assembly code. Thusly it was able to load and calculate the pixels at full speed and a higher Hz than the emulated CPU was capable of.
+
+
+\begin{table}[H]
+\centering
+\caption{}\label{tbl:}
+\begin{tabular}{llllllll}
+\toprule
+\multicolumn{4}{c}{Slowest case} & \multicolumn{2}{c}{Fastest case} \\
+64 Mhz & 500 Mhz & 1 Ghz & 2 Ghz & 64 Mhz & 500 Mhz & 1 Ghz & 2 Ghz \\
+\midrule
+\bottomrule
+\end{tabular}
+\end{table}
 % \section{References}
 % \begin{thebibliography}{1}
 %     \bibitem{arduino}
