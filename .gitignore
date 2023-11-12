@@ -484,4 +484,4 @@ project/**/metals.sbt
 .bsp/
 # End of https://www.toptal.com/developers/gitignore/api/latex,scala,visualstudiocode,intellij,java
 
-SourceCodeGroup22/
+Group22SourceCode/
