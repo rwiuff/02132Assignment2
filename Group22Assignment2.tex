@@ -769,23 +769,23 @@ our register we constructed makes it possible to write and read data, and save i
 Our erosion step has branches that allow it to execute the full process on an image with more or less cycles depending on the original image, therefore each pixel or step takes between 7 cycles and 21 cycles. From our test-runs the full \(20 \times 20\) image takes about 6815 cycles, leaving the program with an average cycle requirement per pixel with all the processing of: 17.03. That means a 64 MHz CPU would perform a step in 265 nanoseconds, a 500 MHz in 34 ns, 1 GHz in 18 ns, 2 GHz in 9 ns. Although depending on the memory it is reading from, it might not be able to complete the step that fast, due to common RAM taking usually around 20-50ns just to read from.\newline
 By counting memory access in an iteration (while ignoring border cases as these decline in number proportional to the total pixel number as the picture grows in size), it can be seen that every black pixel needs two operations, while every white pixels needs six. This means that the memory access, using the above estimate takes for every black pixel takes \(\SI{50}{\nano\second} \times 2 = \SI{100}{\nano\second}\) and every white pixel takes \(\SI{50}{\nano\second} \times 6 = \SI{300}{\nano\second}\). An overview of the memory access times an cycles for the three pictures (Black image, White image, and Cells image) can be seen in \cref{tbl:memacccycl}
 \begin{table}[H]
-\centering
-\caption{Memory access times and cycles for the three images}\label{tbl:memacccycl}
-\begin{tabular}{llll}
-\toprule
- & Black image & White image & Cell image \\
- No of black pixels & 400 &0 &341\\
- Black pixel ram access & 800 & 0&682\\
- Memory access time & 40,000 ns & 0 ns & 34,100 ns \\
- \midrule
- No of white pixels & 0 & 400&59\\
- White pixel ram access & 0 & 2400& 354 \\
- Memory access time & 0 ns & 120,000 ns & 17,700 ns\\
- \midrule
- Total memory access time & 40,000 ns & 120,000 ns & 51,800 ns\\
- Cycles & 5635 & 12115&6815\\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Memory access times and cycles for the three images}\label{tbl:memacccycl}
+    \begin{tabular}{llll}
+        \toprule
+                                 & Black image & White image & Cell image \\
+        No of black pixels       & 400         & 0           & 341        \\
+        Black pixel ram access   & 800         & 0           & 682        \\
+        Memory access time       & 40,000 ns   & 0 ns        & 34,100 ns  \\
+        \midrule
+        No of white pixels       & 0           & 400         & 59         \\
+        White pixel ram access   & 0           & 2400        & 354        \\
+        Memory access time       & 0 ns        & 120,000 ns  & 17,700 ns  \\
+        \midrule
+        Total memory access time & 40,000 ns   & 120,000 ns  & 51,800 ns  \\
+        Cycles                   & 5635        & 12115       & 6815       \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 Using \cref{tbl:memacccycl}, the runtimes can be estimated using the following equation:
 \begin{align}
@@ -793,17 +793,17 @@ Using \cref{tbl:memacccycl}, the runtimes can be estimated using the following e
 \end{align}
 \cref{tbl:GHZ} shows the runtimes at various speeds for the three images calculated with \cref{eq:formula}.
 \begin{table}[H]
-\centering
-\caption{Runtimes at various clockspeeds}\label{tbl:GHZ}
-\begin{tabular}{lrrrr}
-\toprule
-&64 Mhz & 500 Mhz & 1 Ghz & 2 Ghz \\
-\midrule
-Black image & 128,047 ns & 51,270 ns & 45,635 ns & 42,818 ns \\
-White image & 309,297 ns & 144,230 ns & 132,115 ns & 126,058 ns \\
-Cells image & 158,284 ns & 65,430 ns & 58,615 ns & 55,208 ns \\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Runtimes at various clockspeeds}\label{tbl:GHZ}
+    \begin{tabular}{lrrrr}
+        \toprule
+                    & 64 Mhz     & 500 Mhz    & 1 Ghz      & 2 Ghz      \\
+        \midrule
+        Black image & 128,047 ns & 51,270 ns  & 45,635 ns  & 42,818 ns  \\
+        White image & 309,297 ns & 144,230 ns & 132,115 ns & 126,058 ns \\
+        Cells image & 158,284 ns & 65,430 ns  & 58,615 ns  & 55,208 ns  \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 Since our code needs to load from memory and then calculate on the same 6 registers, while using the other registers to reference from, the program would not benefit from a very fast clock cycle, and in the end become very dependent on memory load speed for its total time required to run.\newline
 The cells image had a white cell percentage of \(\frac{59}{400} \approx 15 \%\). The image from assignment one had \(950 \times 950 = 902,500\), yielding with the same percentage \(902,500 \times 0.15 = 135375\) white pixels and \(902,500 \times 0.85 = 767125\) black pixels. If the cycles on that percentage scales linearly the total number of cycles is:
@@ -811,22 +811,22 @@ The cells image had a white cell percentage of \(\frac{59}{400} \approx 15 \%\).
     \frac{6815}{400} \times 902,500 \approx 15,376,000
 \end{align}
 \begin{table}[H]
-\centering
-\caption{Memory access times and cycles a 950 \(\times\) 950 image}\label{tbl:950}
-\begin{tabular}{llll}
-\toprule
- No of black pixels &767125 \\
- Black pixel ram access & 1534250\\
- Memory access time &  76,712,500 ns\\
- \midrule
- No of white pixels &135375\\
- White pixel ram access & 812250 \\
- Memory access time &40,612,500 ns\\
- \midrule
- Total memory access time & 117,325,000 ns\\
- Cycles & 15,376,000\\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Memory access times and cycles a 950 \(\times\) 950 image}\label{tbl:950}
+    \begin{tabular}{llll}
+        \toprule
+        No of black pixels       & 767125         \\
+        Black pixel ram access   & 1534250        \\
+        Memory access time       & 76,712,500 ns  \\
+        \midrule
+        No of white pixels       & 135375         \\
+        White pixel ram access   & 812250         \\
+        Memory access time       & 40,612,500 ns  \\
+        \midrule
+        Total memory access time & 117,325,000 ns \\
+        Cycles                   & 15,376,000     \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 \cref{tbl:950} shows the memory access estimate and number of cycles estimate for the picture from assignment 1. On a 1 Ghz chip the runtime would be:
 \begin{align}
