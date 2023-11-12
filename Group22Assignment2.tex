@@ -759,27 +759,80 @@ The opcode and corresponding control signals are shown in \cref{tbl:cu}.
 \end{landscape}
 \section{Implementation}\label{sec:implement}
 % \emph{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question “What does a reader need to know about your Chisel implementation?”}
-In our chisel code we have designed different components to work together to create and operate as a CPU.
-We have The ALU that makes the calculations. The way we structured is that, it has 3 inputs and 1 output. 1 input is for the function and 2 input it's for the values, then we have an output that are for the result of the calculation. and I used a switch to determine what function is selected, and we have written some tests that test different scenarios about this and even check for overflowing even though, we will not overflow this 32-bit system.
+In our chisel code we have designed different components to work together to create and operate as a general programmable CPU, it's made to be able to solve any solvable task, with a balanced distribution of registers and processing units such as the ALU.
+We have The ALU that makes all the calculations, it uses a switch to determine what mathematical operation is selected, and then checks for overflowing even though for this assignment it is quite overkill, as no value will ever overflow the 16 bits capacity.
 Then we have our register where we create an array that save it
 our register we constructed makes it possible to write and read data, and save it to a register if we wanted to. so it has 5 inputs, 2 values, 1 its need to be written, 1 where it needs to be written, and 1 is the specific data that need to be written.
-in our "CPUTop" we designed the CPU itself, where we connects every single components that we constructed to communicate together. we designed what bit was reserved to what so that we knew when there was a 32 bit then what component should read each bit.
+"CPUTop" is our main implementation of the CPU, we designed the CPU itself, where we connects every single components that we constructed to communicate together. we designed what bit was reserved to what so that we knew when there was a 32 bit then what component should read each bit from the opcode. Our implementation during emulation communicates with the console through chisel's poke, letting us see the results clearly in the command line in the IDE for easy debugging and use.
 \section{Test and analysis}\label{sec:test}
 % \emph{Report here the results from the test you have carried out. Present the test you have developed (if any). Remember to discuss the results and the test you have carried out, do not just present them, but explain and argue their meaning. Address the design evaluation questions listed in Task 11 in the Assignment 2 document.}
-Our erosion step has branches that allow it to execute the full process on an image with more or less cycles depending on the original image, therefore each pixel or step takes between 7 cycles and 21 cycles. From our test-runs the full \(20 \times 20\) image takes about 6815 cycles, leaving the program with an average cycle requirement per pixel with all the processing of: 17.03. That means a 64 MHz CPU would perform a step in 265 nanoseconds, a 500 MHz in 34 ns, 1 GHz in 18 ns, 2 GHz in 9 ns. Although depending on the memory it is reading from, it might not be able to complete the step that fast, due to common RAM taking usually around 20-50ns just to read from. Since our code needs to load from ram and then calculate on the same 6 registers, while using the other registers to reference from, the program would not benefit from a very fast clock cycle, and in the end become very dependent on memory load speed for its total time required to run. Scaling this concept up, on the emulated CPU which ran at 2761Hz it completed 400 pixels in 2.9 seconds and printed it out, for a \(950 \times 950\) image like in assignment 1, it is reasonable to assume that would take 87.7 minutes with the same CPU setup. Assignment 1 on the same computer took 201 ms to complete the same task of loading the image (although a bit more complex due to needing to grey scale) and then erode once. Although this is an unfair comparison, due to Assignment 1 ran directly on the Windows machine with an executable file compiled by GCC, which is quite competent in optimising code into assembly, easily beating our own made assembly code. Thusly it was able to load and calculate the pixels at full speed and a higher Hz than the emulated CPU was capable of.
-
-
+Our erosion step has branches that allow it to execute the full process on an image with more or less cycles depending on the original image, therefore each pixel or step takes between 7 cycles and 21 cycles. From our test-runs the full \(20 \times 20\) image takes about 6815 cycles, leaving the program with an average cycle requirement per pixel with all the processing of: 17.03. That means a 64 MHz CPU would perform a step in 265 nanoseconds, a 500 MHz in 34 ns, 1 GHz in 18 ns, 2 GHz in 9 ns. Although depending on the memory it is reading from, it might not be able to complete the step that fast, due to common RAM taking usually around 20-50ns just to read from.\newline
+By counting memory access in an iteration (while ignoring border cases as these decline in number proportional to the total pixel number as the picture grows in size), it can be seen that every black pixel needs two operations, while every white pixels needs six. This means that the memory access, using the above estimate takes for every black pixel takes \(\SI{50}{\nano\second} \times 2 = \SI{100}{\nano\second}\) and every white pixel takes \(\SI{50}{\nano\second} \times 6 = \SI{300}{\nano\second}\). An overview of the memory access times an cycles for the three pictures (Black image, White image, and Cells image) can be seen in \cref{tbl:memacccycl}
 \begin{table}[H]
 \centering
-\caption{}\label{tbl:}
-\begin{tabular}{llllllll}
+\caption{Memory access times and cycles for the three images}\label{tbl:memacccycl}
+\begin{tabular}{llll}
 \toprule
-\multicolumn{4}{c}{Slowest case} & \multicolumn{2}{c}{Fastest case} \\
-64 Mhz & 500 Mhz & 1 Ghz & 2 Ghz & 64 Mhz & 500 Mhz & 1 Ghz & 2 Ghz \\
-\midrule
+ & Black image & White image & Cell image \\
+ No of black pixels & 400 &0 &341\\
+ Black pixel ram access & 800 & 0&682\\
+ Memory access time & 40,000 ns & 0 ns & 34,100 ns \\
+ \midrule
+ No of white pixels & 0 & 400&59\\
+ White pixel ram access & 0 & 2400& 354 \\
+ Memory access time & 0 ns & 120,000 ns & 17,700 ns\\
+ \midrule
+ Total memory access time & 40,000 ns & 120,000 ns & 51,800 ns\\
+ Cycles & 5635 & 12115&6815\\
 \bottomrule
 \end{tabular}
 \end{table}
+Using \cref{tbl:memacccycl}, the runtimes can be estimated using the following equation:
+\begin{align}
+    \text{Memory access time } + \frac{\text{Cycles}}{\text{Clockspeed}}\label{eq:formula}
+\end{align}
+\cref{tbl:GHZ} shows the runtimes at various speeds for the three images calculated with \cref{eq:formula}.
+\begin{table}[H]
+\centering
+\caption{Runtimes at various clockspeeds}\label{tbl:GHZ}
+\begin{tabular}{lrrrr}
+\toprule
+&64 Mhz & 500 Mhz & 1 Ghz & 2 Ghz \\
+\midrule
+Black image & 128,047 ns & 51,270 ns & 45,635 ns & 42,818 ns \\
+White image & 309,297 ns & 144,230 ns & 132,115 ns & 126,058 ns \\
+Cells image & 158,284 ns & 65,430 ns & 58,615 ns & 55,208 ns \\
+\bottomrule
+\end{tabular}
+\end{table}
+Since our code needs to load from memory and then calculate on the same 6 registers, while using the other registers to reference from, the program would not benefit from a very fast clock cycle, and in the end become very dependent on memory load speed for its total time required to run.\newline
+The cells image had a white cell percentage of \(\frac{59}{400} \approx 15 \%\). The image from assignment one had \(950 \times 950 = 902,500\), yielding with the same percentage \(902,500 \times 0.15 = 135375\) white pixels and \(902,500 \times 0.85 = 767125\) black pixels. If the cycles on that percentage scales linearly the total number of cycles is:
+\begin{align}
+    \frac{6815}{400} \times 902,500 \approx 15,376,000
+\end{align}
+\begin{table}[H]
+\centering
+\caption{Memory access times and cycles a 950 \(\times\) 950 image}\label{tbl:950}
+\begin{tabular}{llll}
+\toprule
+ No of black pixels &767125 \\
+ Black pixel ram access & 1534250\\
+ Memory access time &  76,712,500 ns\\
+ \midrule
+ No of white pixels &135375\\
+ White pixel ram access & 812250 \\
+ Memory access time &40,612,500 ns\\
+ \midrule
+ Total memory access time & 117,325,000 ns\\
+ Cycles & 15,376,000\\
+\bottomrule
+\end{tabular}
+\end{table}
+\cref{tbl:950} shows the memory access estimate and number of cycles estimate for the picture from assignment 1. On a 1 Ghz chip the runtime would be:
+\begin{align}
+    \SI{117325000}{\nano\second} + \frac{15376000}{\SI{1}{\giga\hertz}} \approx \SI{132.7}{\milli\second}
+\end{align}
+Assignment 1 on the same computer took 201 ms to complete the same task of loading the image (although a bit more complex due to needing to grey scale) and then erode once. Although this is an unfair comparison, due to Assignment 1 ran directly on the Windows machine with an executable file compiled by GCC, which is quite competent in optimising code into assembly, easily beating our own made assembly code.
 % \section{References}
 % \begin{thebibliography}{1}
 %     \bibitem{arduino}
